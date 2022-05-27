@@ -1,3 +1,5 @@
+CMakeLists.txt
+cmake-build-debug
 # Prerequisites
 *.d
 
@@ -5,7 +7,6 @@
 *.slo
 *.lo
 *.o
-*.obj
 
 # Precompiled Headers
 *.gch
