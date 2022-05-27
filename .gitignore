@@ -38,3 +38,5 @@ cmake-build-debug
 *.vcxproj
 *.filters
 /ProvaCG.vcxproj.user
+/x64/Debug
+/CGProject3.vcxproj.user
