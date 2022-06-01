@@ -28,6 +28,9 @@
 
 //const std::string MODEL_PATH = "models/viking_room.obj";
 const std::string MODEL_PATH = "models/statue_prova.obj";
+//const std::string MODEL_PATH = "models/hercules.obj";
+//const std::string MODEL_PATH = "models/venus.obj";
+//const std::string MODEL_PATH = "models/discobolus.obj";
 
 // New in Lesson 23 - to load images
 #define STB_IMAGE_IMPLEMENTATION
@@ -35,6 +38,9 @@ const std::string MODEL_PATH = "models/statue_prova.obj";
 
 //const std::string TEXTURE_PATH = "textures/viking_room.png";
 const std::string TEXTURE_PATH = "textures/DavidFixedDiff.jpg";
+//const std::string TEXTURE_PATH = "textures/hercules.jpg";
+//const std::string TEXTURE_PATH = "textures/statue_venus.jpg";
+//const std::string TEXTURE_PATH = "textures/manstatue.png";
 
 //
 
@@ -1204,6 +1210,7 @@ private:
         int texWidth, texHeight, texChannels;
         stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight,
                                     &texChannels, STBI_rgb_alpha);
+
         if (!pixels) {
             throw std::runtime_error("failed to load texture image!");
         }
