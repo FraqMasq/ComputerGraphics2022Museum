@@ -6,15 +6,15 @@
 //const std::string MODEL_PATH = "models/viking_room.obj";
 //const std::string MODEL_PATH = "models/statue_prova.obj";
 //const std::string MODEL_PATH = "models/hercules.obj";
-//const std::string MODEL_PATH = "models/venus.obj";
-const std::string MODEL_PATH = "models/discobolus.obj";
+const std::string VENUS_MODEL_PATH = "models/venus.obj";
+const std::string DISCO_MODEL_PATH = "models/discobolus.obj";
 
 //TEXTURE
 //const std::string TEXTURE_PATH = "textures/viking_room.png";
 //const std::string TEXTURE_PATH = "textures/DavidFixedDiff.jpg";
 //const std::string TEXTURE_PATH = "textures/hercules.jpg";
-//const std::string TEXTURE_PATH = "textures/statue_venus.jpg";
-const std::string TEXTURE_PATH = "textures/manstatue.png";
+const std::string VENUS_TEXTURE_PATH = "textures/statue_venus.jpg";
+const std::string DISCO_TEXTURE_PATH = "textures/manstatue.png";
 
 
 // The uniform buffer object used in this example
@@ -46,10 +46,14 @@ class MyProject : public BaseProject {
 	Pipeline P1;
 
 	// Models, textures and Descriptors (values assigned to the uniforms)
-	Model M1;
-	Texture T1;
-	DescriptorSet DS1; //!= positioning for same copy of obj need != DS
-	
+	Model M_VENUS;
+	Texture T_VENUS;
+	DescriptorSet DS_VENUS; //!= positioning for same copy of obj need != DS
+
+    Model M_DISCO;
+    Texture T_DISCO;
+    DescriptorSet DS_DISCO;
+
 	// Here you set the main application parameters
 	void setWindowParameters() {
 		// window size, titile and initial background
@@ -59,9 +63,9 @@ class MyProject : public BaseProject {
 		initialBackgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		
 		// Descriptor pool sizes -> modify if add other models
-		uniformBlocksInPool = 1;
-		texturesInPool = 1;
-		setsInPool = 1;
+		uniformBlocksInPool = 2;
+		texturesInPool = 2;
+		setsInPool = 2;
 	}
 	
 	// Here you load and setup all your Vulkan objects
@@ -82,10 +86,10 @@ class MyProject : public BaseProject {
 		P1.init(this, "shaders/vert.spv", "shaders/frag.spv", {&DSL1});
 
 		// Models, textures and Descriptors (values assigned to the uniforms)
-		M1.init(this, MODEL_PATH);
-		T1.init(this, TEXTURE_PATH);
+		M_VENUS.init(this, VENUS_MODEL_PATH);
+		T_VENUS.init(this, VENUS_TEXTURE_PATH);
         //M2, T2 AND DS2 for other obj 2 and init (same DS_layout -> same positioning)
-		DS1.init(this, &DSL1, {
+		DS_VENUS.init(this, &DSL1, {
 		// the second parameter, is a pointer to the Uniform Set Layout of this set
 		// the last parameter is an array, with one element per binding of the set.
 		// first  elmenet : the binding number
@@ -93,16 +97,35 @@ class MyProject : public BaseProject {
 		// third  element : only for UNIFORMs, the size of the corresponding C++ object
 		// fourth element : only for TEXTUREs, the pointer to the corresponding texture object
 					{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
-					{1, TEXTURE, 0, &T1}
+					{1, TEXTURE, 0, &T_VENUS}
 				});
+
+        M_DISCO.init(this, DISCO_MODEL_PATH);
+        T_DISCO.init(this, DISCO_TEXTURE_PATH);
+        //M2, T2 AND DS2 for other obj 2 and init (same DS_layout -> same positioning)
+        DS_DISCO.init(this, &DSL1, {
+                // the second parameter, is a pointer to the Uniform Set Layout of this set
+                // the last parameter is an array, with one element per binding of the set.
+                // first  elmenet : the binding number
+                // second element : UNIFORM or TEXTURE (an enum) depending on the type
+                // third  element : only for UNIFORMs, the size of the corresponding C++ object
+                // fourth element : only for TEXTUREs, the pointer to the corresponding texture object
+                {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
+                {1, TEXTURE, 0, &T_DISCO}
+        });
+
 	}
 
 	// Here you destroy all the objects you created!		
 	void localCleanup() {
-		DS1.cleanup();
-		T1.cleanup();
-		M1.cleanup();
-        //M2, T2, DS2 cleanup
+		DS_VENUS.cleanup();
+		T_VENUS.cleanup();
+		M_VENUS.cleanup();
+
+        DS_DISCO.cleanup();
+        T_DISCO.cleanup();
+        M_DISCO.cleanup();
+
 		P1.cleanup();
 		DSL1.cleanup();
 	}
@@ -118,27 +141,42 @@ class MyProject : public BaseProject {
 
         //We need differend command buffer and index buffer
         /*FROM HERE*/
-		VkBuffer vertexBuffers[] = {M1.vertexBuffer};
+		VkBuffer vertexBuffers[] = {M_VENUS.vertexBuffer};
 		// property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
 		VkDeviceSize offsets[] = {0};
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		// property .indexBuffer of models, contains the VkBuffer handle to its index buffer
-		vkCmdBindIndexBuffer(commandBuffer, M1.indexBuffer, 0,
+		vkCmdBindIndexBuffer(commandBuffer, M_VENUS.indexBuffer, 0,
 								VK_INDEX_TYPE_UINT32);
 
 		// property .pipelineLayout of a pipeline contains its layout.
 		// property .descriptorSets of a descriptor set contains its elements.
 		vkCmdBindDescriptorSets(commandBuffer,
 						VK_PIPELINE_BIND_POINT_GRAPHICS,
-						P1.pipelineLayout, 0, 1, &DS1.descriptorSets[currentImage],
+						P1.pipelineLayout, 0, 1, &DS_VENUS.descriptorSets[currentImage],
 						0, nullptr);
 
 
 
 		// property .indices.size() of models, contains the number of triangles * 3 of the mesh.
 		vkCmdDrawIndexed(commandBuffer,
-					static_cast<uint32_t>(M1.indices.size()), 1, 0, 0, 0);
+					static_cast<uint32_t>(M_VENUS.indices.size()), 1, 0, 0, 0);
         /*TO HERE duplicated for each obj*/
+
+        VkBuffer vertexBuffersDisco[] = {M_DISCO.vertexBuffer};
+        // property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
+        VkDeviceSize offsetsDisco[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffersDisco, offsetsDisco);
+        // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
+        vkCmdBindIndexBuffer(commandBuffer, M_DISCO.indexBuffer, 0,
+                             VK_INDEX_TYPE_UINT32);
+        vkCmdBindDescriptorSets(commandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                P1.pipelineLayout, 0, 1, &DS_DISCO.descriptorSets[currentImage],
+                                0, nullptr);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(M_DISCO.indices.size()), 1, 0, 0, 0);
+
 	}
 
 	// Here is where you update the uniforms.
@@ -151,6 +189,7 @@ class MyProject : public BaseProject {
 
         //Duplicate for each obj, model may change and view/proj is same for each obj
 		UniformBufferObject ubo{};
+        //Here rotate
 		ubo.model = glm::rotate(glm::mat4(1.0f),
 								time * glm::radians(90.0f),
 								glm::vec3(0.0f, 0.0f, 1.0f));
@@ -164,12 +203,31 @@ class MyProject : public BaseProject {
 		
 		void* data;
 
+        //For venus
+        ubo.model = glm::rotate(glm::mat4(1.0f),
+                                time * glm::radians(90.0f),
+                                glm::vec3(0.0f, 0.0f, 1.0f))*
+                    glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));;
 		// Here is where you actually update your uniforms
         //Also duplicated!
-		vkMapMemory(device, DS1.uniformBuffersMemory[0][currentImage], 0,
+		vkMapMemory(device, DS_VENUS.uniformBuffersMemory[0][currentImage], 0,
 							sizeof(ubo), 0, &data);
 		memcpy(data, &ubo, sizeof(ubo));
-		vkUnmapMemory(device, DS1.uniformBuffersMemory[0][currentImage]);
+		vkUnmapMemory(device, DS_VENUS.uniformBuffersMemory[0][currentImage]);
+
+        //For discobolus
+        ubo.model = glm::rotate(glm::mat4(1.0f),
+                                time * glm::radians(90.0f),
+                                glm::vec3(0.0f, 0.0f, 1.0f)) *
+                                        glm::translate(glm::mat4(3.0f), glm::vec3(1.5f, 0.0f, 0.0f));
+        // Here is where you actually update your uniforms
+        //Also duplicated!
+        vkMapMemory(device, DS_DISCO.uniformBuffersMemory[0][currentImage], 0,
+                    sizeof(ubo), 0, &data);
+        memcpy(data, &ubo, sizeof(ubo));
+        vkUnmapMemory(device, DS_DISCO.uniformBuffersMemory[0][currentImage]);
+
+
 	}	
 };
 
