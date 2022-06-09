@@ -27,10 +27,13 @@ const std::string DISCO_TEXTURE_PATH = "textures/manstatue.png";
 //at the end change in shaders the set position
 // vert: (glb is set0bind0, obj is set1bind0)
 // frag: text is set1bind1
-struct UniformBufferObject {
-	alignas(16) glm::mat4 model;
+struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
+};
+
+struct UniformBufferObject {
+    alignas(16) glm::mat4 model;
 };
 
 
@@ -40,10 +43,13 @@ class MyProject : public BaseProject {
 	// Here you list all the Vulkan objects you need:
 	
 	// Descriptor Layouts [what will be passed to the shaders]
-	DescriptorSetLayout DSL1;
+	DescriptorSetLayout DSLGlobal;
+    DescriptorSetLayout DSLObj;
 
 	// Pipelines [Shader couples]
 	Pipeline P1;
+
+    DescriptorSet DS_GLOBAL;
 
 	// Models, textures and Descriptors (values assigned to the uniforms)
 	Model M_VENUS;
@@ -54,6 +60,8 @@ class MyProject : public BaseProject {
     Texture T_DISCO;
     DescriptorSet DS_DISCO;
 
+
+
 	// Here you set the main application parameters
 	void setWindowParameters() {
 		// window size, titile and initial background
@@ -63,15 +71,19 @@ class MyProject : public BaseProject {
 		initialBackgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		
 		// Descriptor pool sizes -> modify if add other models
-		uniformBlocksInPool = 2;
+		uniformBlocksInPool = 3;
 		texturesInPool = 2;
-		setsInPool = 2;
+		setsInPool = 3;
 	}
 	
 	// Here you load and setup all your Vulkan objects
 	void localInit() {
 		// Descriptor Layouts [what will be passed to the shaders]
-		DSL1.init(this, {
+        DSLGlobal.init(this, {
+                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
+        });
+
+		DSLObj.init(this, {
 					// this array contains the binding:
 					// first  element : the binding number
 					// second element : the time of element (buffer or texture)
@@ -83,13 +95,17 @@ class MyProject : public BaseProject {
 		// Pipelines [Shader couples]
 		// The last array, is a vector of pointer to the layouts of the sets that will
 		// be used in this pipeline. The first element will be set 0, and so on..
-		P1.init(this, "shaders/vert.spv", "shaders/frag.spv", {&DSL1});
+		P1.init(this, "shaders/vert.spv", "shaders/frag.spv", {&DSLGlobal, &DSLObj});
+
+        DS_GLOBAL.init(this, &DSLGlobal, {
+                {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
+        });
 
 		// Models, textures and Descriptors (values assigned to the uniforms)
 		M_VENUS.init(this, VENUS_MODEL_PATH);
 		T_VENUS.init(this, VENUS_TEXTURE_PATH);
         //M2, T2 AND DS2 for other obj 2 and init (same DS_layout -> same positioning)
-		DS_VENUS.init(this, &DSL1, {
+		DS_VENUS.init(this, &DSLObj, {
 		// the second parameter, is a pointer to the Uniform Set Layout of this set
 		// the last parameter is an array, with one element per binding of the set.
 		// first  elmenet : the binding number
@@ -103,16 +119,12 @@ class MyProject : public BaseProject {
         M_DISCO.init(this, DISCO_MODEL_PATH);
         T_DISCO.init(this, DISCO_TEXTURE_PATH);
         //M2, T2 AND DS2 for other obj 2 and init (same DS_layout -> same positioning)
-        DS_DISCO.init(this, &DSL1, {
-                // the second parameter, is a pointer to the Uniform Set Layout of this set
-                // the last parameter is an array, with one element per binding of the set.
-                // first  elmenet : the binding number
-                // second element : UNIFORM or TEXTURE (an enum) depending on the type
-                // third  element : only for UNIFORMs, the size of the corresponding C++ object
-                // fourth element : only for TEXTUREs, the pointer to the corresponding texture object
+        DS_DISCO.init(this, &DSLObj, {
                 {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
                 {1, TEXTURE, 0, &T_DISCO}
         });
+
+
 
 	}
 
@@ -126,8 +138,11 @@ class MyProject : public BaseProject {
         T_DISCO.cleanup();
         M_DISCO.cleanup();
 
+        DS_GLOBAL.cleanup();
+
 		P1.cleanup();
-		DSL1.cleanup();
+		DSLGlobal.cleanup();
+        DSLObj.cleanup();
 	}
 	
 	// Here it is the creation of the command buffer:
@@ -138,6 +153,10 @@ class MyProject : public BaseProject {
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 				P1.graphicsPipeline);
 
+        vkCmdBindDescriptorSets(commandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                P1.pipelineLayout, 0, 1, &DS_GLOBAL.descriptorSets[currentImage],
+                                0, nullptr);
 
         //We need differend command buffer and index buffer
         /*FROM HERE*/
@@ -153,7 +172,7 @@ class MyProject : public BaseProject {
 		// property .descriptorSets of a descriptor set contains its elements.
 		vkCmdBindDescriptorSets(commandBuffer,
 						VK_PIPELINE_BIND_POINT_GRAPHICS,
-						P1.pipelineLayout, 0, 1, &DS_VENUS.descriptorSets[currentImage],
+						P1.pipelineLayout, 1, 1, &DS_VENUS.descriptorSets[currentImage],
 						0, nullptr);
 
 
@@ -172,7 +191,7 @@ class MyProject : public BaseProject {
                              VK_INDEX_TYPE_UINT32);
         vkCmdBindDescriptorSets(commandBuffer,
                                 VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                P1.pipelineLayout, 0, 1, &DS_DISCO.descriptorSets[currentImage],
+                                P1.pipelineLayout, 1, 1, &DS_DISCO.descriptorSets[currentImage],
                                 0, nullptr);
         vkCmdDrawIndexed(commandBuffer,
                          static_cast<uint32_t>(M_DISCO.indices.size()), 1, 0, 0, 0);
@@ -189,19 +208,22 @@ class MyProject : public BaseProject {
 
         //Duplicate for each obj, model may change and view/proj is same for each obj
 		UniformBufferObject ubo{};
-        //Here rotate
-		ubo.model = glm::rotate(glm::mat4(1.0f),
-								time * glm::radians(90.0f),
-								glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+        GlobalUniformBufferObject gubo{};
+        void* data;
+
+
+		gubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
 							   glm::vec3(0.0f, 0.0f, 0.0f),
 							   glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.proj = glm::perspective(glm::radians(45.0f),
+		gubo.proj = glm::perspective(glm::radians(45.0f),
 						swapChainExtent.width / (float) swapChainExtent.height,
 						0.1f, 10.0f);
-		ubo.proj[1][1] *= -1;
-		
-		void* data;
+		gubo.proj[1][1] *= -1;
+
+        vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
+                    sizeof(gubo), 0, &data);
+        memcpy(data, &gubo, sizeof(gubo));
+        vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
 
         //For venus
         ubo.model = glm::rotate(glm::mat4(1.0f),
