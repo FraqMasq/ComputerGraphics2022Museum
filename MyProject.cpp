@@ -124,7 +124,15 @@ class MyProject : public BaseProject {
         DS_GLOBAL.init(this, &DSLGlobal, {
                 {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
         });
+	
+	}
 
+	void localReInit() {
+		// Pipelines [Shader couples]
+		// The last array, is a vector of pointer to the layouts of the sets that will
+		// be used in this pipeline. The first element will be set 0, and so on..
+		P1.reinit(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj }); //maybe reinit is equal to init at the end, check if needs another moethod
+		
 	}
 
 	// Here you destroy all the objects you created!		
@@ -142,6 +150,15 @@ class MyProject : public BaseProject {
 		P1.cleanup();
 		DSLGlobal.cleanup();
         DSLObj.cleanup();
+	}
+
+	void localPipeCleanup() {
+		P1.cleanup();
+	}
+
+	static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+		auto app = reinterpret_cast<MyProject*>(glfwGetWindowUserPointer(window));
+		app->framebufferResized = true;
 	}
 	
 	// Here it is the creation of the command buffer:
@@ -196,7 +213,8 @@ class MyProject : public BaseProject {
                          static_cast<uint32_t>(M_DISCO.indices.size()), 1, 0, 0, 0);
 
 	}
-
+	
+	//________________
 	// Here is where you update the uniforms.
 	// Very likely this will be where you will be writing the logic of your application.
 	void updateUniformBuffer(uint32_t currentImage) {
@@ -226,7 +244,7 @@ class MyProject : public BaseProject {
 
         //For venus
         ubo.model = glm::rotate(glm::mat4(1.0f),
-                                time * glm::radians(90.0f),
+                                glm::radians(270.0f), //*time
                                 glm::vec3(0.0f, 0.0f, 1.0f))*
                     glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));;
 		// Here is where you actually update your uniforms
@@ -238,7 +256,7 @@ class MyProject : public BaseProject {
 
         //For discobolus
         ubo.model = glm::rotate(glm::mat4(1.0f),
-                                time * glm::radians(90.0f),
+                                glm::radians(270.0f), //*time
                                 glm::vec3(0.0f, 0.0f, 1.0f)) *
                                         glm::translate(glm::mat4(3.0f), glm::vec3(1.5f, 0.0f, 0.0f));
         // Here is where you actually update your uniforms
