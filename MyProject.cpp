@@ -6,18 +6,19 @@
 //const std::string MODEL_PATH = "models/viking_room.obj";
 //const std::string MODEL_PATH = "models/statue_prova.obj";
 //const std::string MODEL_PATH = "models/hercules.obj";
-//const std::string VENUS_MODEL_PATH = "models/KitchenWallsProva.obj";//"models/venus.obj";
+const std::string STRUCTURE_MODEL_PATH = "models/WallsAndFloor.obj";//"models/venus.obj";
 const std::string VENUS_MODEL_PATH = "models/venus.obj";
 const std::string DISCO_MODEL_PATH = "models/discobolus.obj";
+//const std::string DISCO_MODEL_PATH = "models/doors.obj";
 
 //TEXTURE
 //const std::string TEXTURE_PATH = "textures/viking_room.png";
 //const std::string TEXTURE_PATH = "textures/DavidFixedDiff.jpg";
 //const std::string TEXTURE_PATH = "textures/hercules.jpg";
-//const std::string VENUS_TEXTURE_PATH = "textures/wall.jpg";//"textures/statue_venus.jpg";
+const std::string STRUCTURE_TEXTURE_PATH = "textures/wall.jpg";//"textures/statue_venus.jpg";
 const std::string VENUS_TEXTURE_PATH = "textures/statue_venus.jpg";
 const std::string DISCO_TEXTURE_PATH = "textures/manstatue.png";
-
+//const std::string DISCO_TEXTURE_PATH = "textures/door.png";
 
 // The uniform buffer object used in this example
 //IT may be splitted in {view, proj}(set0, binding0) and {model}(set1, binding0)
@@ -61,6 +62,10 @@ class MyProject : public BaseProject {
 
     DescriptorSet DS_GLOBAL;
 
+    Model M_STRUCTURE;
+    Texture T_STRUCTURE;
+    DescriptorSet DS_STRUCTURE;
+
 	// Models, textures and Descriptors (values assigned to the uniforms)
 	Model M_VENUS;
 	Texture T_VENUS;
@@ -81,9 +86,9 @@ class MyProject : public BaseProject {
 		initialBackgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		
 		// Descriptor pool sizes -> modify if add other models
-		uniformBlocksInPool = 3;
-		texturesInPool = 2;
-		setsInPool = 3;
+		uniformBlocksInPool = 4;
+		texturesInPool = 3;
+		setsInPool = 4;
 	}
 	
 	// Here you load and setup all your Vulkan objects
@@ -124,10 +129,16 @@ class MyProject : public BaseProject {
 
         M_DISCO.init(this, DISCO_MODEL_PATH);
         T_DISCO.init(this, DISCO_TEXTURE_PATH);
-        //M2, T2 AND DS2 for other obj 2 and init (same DS_layout -> same positioning)
         DS_DISCO.init(this, &DSLObj, {
                 {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
                 {1, TEXTURE, 0, &T_DISCO}
+        });
+
+        M_STRUCTURE.init(this, STRUCTURE_MODEL_PATH);
+        T_STRUCTURE.init(this, STRUCTURE_TEXTURE_PATH);
+        DS_STRUCTURE.init(this, &DSLObj, {
+                {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
+                {1, TEXTURE, 0, &T_STRUCTURE}
         });
 
         DS_GLOBAL.init(this, &DSLGlobal, {
@@ -153,6 +164,10 @@ class MyProject : public BaseProject {
         DS_DISCO.cleanup();
         T_DISCO.cleanup();
         M_DISCO.cleanup();
+
+        DS_STRUCTURE.cleanup();
+        T_STRUCTURE.cleanup();
+        M_STRUCTURE.cleanup();
 
         DS_GLOBAL.cleanup();
 
@@ -183,6 +198,8 @@ class MyProject : public BaseProject {
                                 P1.pipelineLayout, 0, 1, &DS_GLOBAL.descriptorSets[currentImage],
                                 0, nullptr);
 
+
+        //@todo vector per offsets e vertexBuff?
         //We need differend command buffer and index buffer
         /*FROM HERE*/
 		VkBuffer vertexBuffers[] = {M_VENUS.vertexBuffer};
@@ -221,6 +238,19 @@ class MyProject : public BaseProject {
         vkCmdDrawIndexed(commandBuffer,
                          static_cast<uint32_t>(M_DISCO.indices.size()), 1, 0, 0, 0);
 
+
+        VkBuffer vertexBuffersStruct[] = {M_STRUCTURE.vertexBuffer};
+        VkDeviceSize offsetsStruct[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffersStruct, offsetsStruct);
+        vkCmdBindIndexBuffer(commandBuffer, M_STRUCTURE.indexBuffer, 0,
+                             VK_INDEX_TYPE_UINT32);
+        vkCmdBindDescriptorSets(commandBuffer,
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                P1.pipelineLayout, 1, 1, &DS_STRUCTURE.descriptorSets[currentImage],
+                                0, nullptr);
+        vkCmdDrawIndexed(commandBuffer,
+                         static_cast<uint32_t>(M_STRUCTURE.indices.size()), 1, 0, 0, 0);
+
 	}
 
 
@@ -235,12 +265,13 @@ class MyProject : public BaseProject {
         lastTime = time;
         return dt;
     }
-    // Create a look in direction matrix
+    /* Create a look in direction matrix
     // Pos    -> Position of the camera
     // NB Angs have angles in Rad
     // Angs.x -> direction (alpha) -> to be applyed on Y axis
     // Angs.y -> elevation (beta) -> to be applyed on X axis
     // Angs.z -> roll (rho) -> to be applyed on Z axis
+     */
     glm::mat4 LookInDirMat(glm::vec3 Pos, glm::vec3 Angs) {
         glm::vec3 p = glm::vec3(0, 0, 0) - Pos;
 
@@ -328,8 +359,6 @@ class MyProject : public BaseProject {
             camPos = oldPos;
         }
         */
-        glm::vec3 RRCDP = glm::vec3(glm::rotate(glm::mat4(1), YPR.x, glm::vec3(0,1,0)) *
-                                    glm::vec4(camPos,1.0f));
 
         gubo.view = LookInDirMat(camPos, YPR);
 
@@ -342,7 +371,7 @@ class MyProject : public BaseProject {
 
 		gubo.proj = glm::perspective(glm::radians(45.0f),
 						swapChainExtent.width / (float) swapChainExtent.height,
-						0.1f, 10.0f);
+						0.1f, 50.0f);
 		gubo.proj[1][1] *= -1;
 
         vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
@@ -351,9 +380,9 @@ class MyProject : public BaseProject {
         vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
 
         //For venus
-        ubo.model = glm::rotate(glm::mat4(1.0f),
+        ubo.model = /*glm::rotate(glm::mat4(1.0f),
                                 glm::radians(270.0f), //*time
-                                glm::vec3(1.0f, 0.0f, 0.0f))*
+                                glm::vec3(1.0f, 0.0f, 0.0f))**/
                     glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));;
 		// Here is where you actually update your uniforms
         //Also duplicated!
@@ -363,16 +392,25 @@ class MyProject : public BaseProject {
 		vkUnmapMemory(device, DS_VENUS.uniformBuffersMemory[0][currentImage]);
 
         //For discobolus
-        ubo.model = glm::rotate(glm::mat4(1.0f),
+        ubo.model = idMatrix; /*glm::rotate(glm::mat4(1.0f),
                                 glm::radians(270.0f), //*time
-                                glm::vec3(1.0f, 0.0f, 0.0f)) * //@todo perchè devo ruotare per averli dritti?
+                                glm::vec3(1.0f, 0.0f, 0.0f)) *
                                         glm::translate(glm::mat4(3.0f), glm::vec3(1.5f, 0.0f, 0.0f));
+        */
         // Here is where you actually update your uniforms
         //Also duplicated!
         vkMapMemory(device, DS_DISCO.uniformBuffersMemory[0][currentImage], 0,
                     sizeof(ubo), 0, &data);
         memcpy(data, &ubo, sizeof(ubo));
         vkUnmapMemory(device, DS_DISCO.uniformBuffersMemory[0][currentImage]);
+
+
+        //For Structure
+        ubo.model = idMatrix;
+        vkMapMemory(device, DS_STRUCTURE.uniformBuffersMemory[0][currentImage], 0,
+                    sizeof(ubo), 0, &data);
+        memcpy(data, &ubo, sizeof(ubo));
+        vkUnmapMemory(device, DS_STRUCTURE.uniformBuffersMemory[0][currentImage]);
 
 
 	}	
