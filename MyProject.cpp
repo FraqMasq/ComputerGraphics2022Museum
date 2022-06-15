@@ -6,6 +6,7 @@
 //const std::string MODEL_PATH = "models/viking_room.obj";
 //const std::string MODEL_PATH = "models/statue_prova.obj";
 //const std::string MODEL_PATH = "models/hercules.obj";
+//const std::string VENUS_MODEL_PATH = "models/KitchenWallsProva.obj";//"models/venus.obj";
 const std::string VENUS_MODEL_PATH = "models/venus.obj";
 const std::string DISCO_MODEL_PATH = "models/discobolus.obj";
 
@@ -13,6 +14,7 @@ const std::string DISCO_MODEL_PATH = "models/discobolus.obj";
 //const std::string TEXTURE_PATH = "textures/viking_room.png";
 //const std::string TEXTURE_PATH = "textures/DavidFixedDiff.jpg";
 //const std::string TEXTURE_PATH = "textures/hercules.jpg";
+//const std::string VENUS_TEXTURE_PATH = "textures/wall.jpg";//"textures/statue_venus.jpg";
 const std::string VENUS_TEXTURE_PATH = "textures/statue_venus.jpg";
 const std::string DISCO_TEXTURE_PATH = "textures/manstatue.png";
 
@@ -20,7 +22,6 @@ const std::string DISCO_TEXTURE_PATH = "textures/manstatue.png";
 // The uniform buffer object used in this example
 //IT may be splitted in {view, proj}(set0, binding0) and {model}(set1, binding0)
 // among with {texture} (set1, binding0)
-//need change in DSL init (use obj=set1 and make it retrivable by all shaders I.e. ...ALL_GRAPHICS),
 // and add a DSLinit for set0
 //need to bind ds_global with VKBindDescriptorSet and change the others params
 //also add in MapMemory
@@ -37,10 +38,18 @@ struct UniformBufferObject {
 
 };
 
+const glm::mat4 idMatrix = glm::mat4(1);
+const glm::vec3 xAxis = glm::vec3(1, 0, 0);
+const glm::vec3 yAxis = glm::vec3(0, 1, 0);
+const glm::vec3 zAxis = glm::vec3(0, 0, 1);
+
 
 // MAIN ! 
 class MyProject : public BaseProject {
 	protected:
+    //
+    glm::vec3 camPos = glm::vec3(2.0f, 2.0f, 2.0f);
+
 	// Here you list all the Vulkan objects you need:
 	
 	// Descriptor Layouts [what will be passed to the shaders]
@@ -213,7 +222,36 @@ class MyProject : public BaseProject {
                          static_cast<uint32_t>(M_DISCO.indices.size()), 1, 0, 0, 0);
 
 	}
-	
+
+
+    float computeDeltaTime(){
+        // Compute time
+        static auto startTime = std::chrono::high_resolution_clock::now();
+        static float lastTime = 0.0f;
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float time = std::chrono::duration<float, std::chrono::seconds::period>
+                (currentTime-startTime).count();
+        float dt = time - lastTime;
+        lastTime = time;
+        return dt;
+    }
+    // Create a look in direction matrix
+    // Pos    -> Position of the camera
+    // NB Angs have angles in Rad
+    // Angs.x -> direction (alpha) -> to be applyed on Y axis
+    // Angs.y -> elevation (beta) -> to be applyed on X axis
+    // Angs.z -> roll (rho) -> to be applyed on Z axis
+    glm::mat4 LookInDirMat(glm::vec3 Pos, glm::vec3 Angs) {
+        glm::vec3 p = glm::vec3(0, 0, 0) - Pos;
+
+        glm::mat4 out = glm::rotate(idMatrix, -Angs.z, zAxis) *
+                        glm::rotate(idMatrix, -Angs.y, xAxis) *
+                        glm::rotate(idMatrix, -Angs.x, yAxis) *
+                        glm::translate(idMatrix, p);
+
+        return out;
+    }
+
 	//________________
 	// Here is where you update the uniforms.
 	// Very likely this will be where you will be writing the logic of your application.
@@ -228,10 +266,80 @@ class MyProject : public BaseProject {
         GlobalUniformBufferObject gubo{};
         void* data;
 
+        float omega, mu, dt;
+        float rx = 0;
+        float ry = 0;
+        float rz = 0;
+        float mx = 0;
+        float my = 0;
+        float mz = 0;
+        static glm::vec3 YPR = glm::vec3(glm::radians(0.0f), 0.0f, glm::radians(0.0f));
 
+        static glm::vec3 ux = glm::vec3(glm::rotate(idMatrix, YPR.x,yAxis) *
+                                        glm::vec4(1,0,0,1));
+        static glm::vec3 uy = yAxis;
+        static glm::vec3 uz = glm::vec3(glm::rotate(idMatrix, YPR.x,yAxis) *
+                                        glm::vec4(0,0,-1,1));
+
+        omega = 1; //[Rad/s]
+        mu = 1; //[unit/s]
+
+        dt = computeDeltaTime();
+
+        glm::vec3 oldPos = camPos;
+        if(glfwGetKey(window, GLFW_KEY_LEFT)) {
+            YPR.x += dt * omega;
+        }
+        if(glfwGetKey(window, GLFW_KEY_RIGHT)) {
+            YPR.x -= dt * omega;
+        }
+        if(glfwGetKey(window, GLFW_KEY_UP)) {
+            YPR.y += dt * omega;
+        }
+        if(glfwGetKey(window, GLFW_KEY_DOWN)) {
+            YPR.y -= dt * omega;
+        }
+        if(glfwGetKey(window, GLFW_KEY_Q)) {
+            YPR.z -= dt * omega;
+        }
+        if(glfwGetKey(window, GLFW_KEY_E)) {
+            YPR.z += dt * omega;
+        }
+        if(glfwGetKey(window, GLFW_KEY_A)) {
+            camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
+                                                           glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1,0,0,1)) * dt;
+        }
+        if(glfwGetKey(window, GLFW_KEY_D)) {
+            camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
+                                                           glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1,0,0,1)) * dt;
+        }
+        if(glfwGetKey(window, GLFW_KEY_W)) {
+            camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
+                                                           glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0,0,1,1)) * dt;
+        }
+        if(glfwGetKey(window, GLFW_KEY_S)) {
+            camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
+                                                           glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0,0,1,1)) * dt;
+        }
+
+
+        /*@todo implement canStep to enable stopping the movement
+        if(!canStep(camPos.x, camPos.z)) {
+            camPos = oldPos;
+        }
+        */
+        glm::vec3 RRCDP = glm::vec3(glm::rotate(glm::mat4(1), YPR.x, glm::vec3(0,1,0)) *
+                                    glm::vec4(camPos,1.0f));
+
+        gubo.view = LookInDirMat(camPos, YPR);
+
+        /*
 		gubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
 							   glm::vec3(0.0f, 0.0f, 0.0f),
 							   glm::vec3(0.0f, 0.0f, 1.0f));
+        */
+
+
 		gubo.proj = glm::perspective(glm::radians(45.0f),
 						swapChainExtent.width / (float) swapChainExtent.height,
 						0.1f, 10.0f);
@@ -245,7 +353,7 @@ class MyProject : public BaseProject {
         //For venus
         ubo.model = glm::rotate(glm::mat4(1.0f),
                                 glm::radians(270.0f), //*time
-                                glm::vec3(0.0f, 0.0f, 1.0f))*
+                                glm::vec3(1.0f, 0.0f, 0.0f))*
                     glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));;
 		// Here is where you actually update your uniforms
         //Also duplicated!
@@ -257,7 +365,7 @@ class MyProject : public BaseProject {
         //For discobolus
         ubo.model = glm::rotate(glm::mat4(1.0f),
                                 glm::radians(270.0f), //*time
-                                glm::vec3(0.0f, 0.0f, 1.0f)) *
+                                glm::vec3(1.0f, 0.0f, 0.0f)) * //@todo perchè devo ruotare per averli dritti?
                                         glm::translate(glm::mat4(3.0f), glm::vec3(1.5f, 0.0f, 0.0f));
         // Here is where you actually update your uniforms
         //Also duplicated!
