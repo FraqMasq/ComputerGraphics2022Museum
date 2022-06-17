@@ -8,7 +8,7 @@
 //const std::string MODEL_PATH = "models/hercules.obj";
 //const std::string DISCO_MODEL_PATH = "models/doors.obj";
 
-//@todo WallsAndFloor2 ha soffitto, meglio separarli?
+//@todo WallsAndFloor2 ha soffitto
 const std::string STRUCTURE_MODEL_PATH = "models/WallsAndFloor.obj"; //"models/WallsAndFloor2.obj";
 const std::string VENUS_MODEL_PATH = "models/venus.obj";
 const std::string DISCO_MODEL_PATH = "models/discobolus.obj";
@@ -98,7 +98,7 @@ class MyProject : public BaseProject {
 		// Descriptor pool sizes -> modify if add other models
 		uniformBlocksInPool = 4;
 		texturesInPool = 3;
-		setsInPool = 4;
+		setsInPool = 8;
 	}
 	
 	// Here you load and setup all your Vulkan objects
@@ -186,6 +186,7 @@ class MyProject : public BaseProject {
         DSLObj.cleanup();
 	}
 
+    //@todo Controllo se P1 != VK_NULL_HANDLE -> cleanup
 	void localPipeCleanup() {
 		P1.cleanup();
 	}
@@ -209,7 +210,7 @@ class MyProject : public BaseProject {
                                 0, nullptr);
 
 
-        //@todo vector per offsets e vertexBuff?
+        //@todo vector per offsets e vertexBuff? e indicizziamo con dictionary
         //We need differend command buffer and index buffer
         /*FROM HERE*/
 		VkBuffer vertexBuffers[] = {M_VENUS.vertexBuffer};
@@ -364,7 +365,7 @@ class MyProject : public BaseProject {
         }
 
 
-        /*@todo implement canStep to enable stopping the movement
+        /*@todo implement canStep to enable stopping the movement (A06.cpp)
         if(!canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
         }
