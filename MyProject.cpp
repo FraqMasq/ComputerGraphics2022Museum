@@ -4,21 +4,31 @@
 
 //MODEL
 //const std::string MODEL_PATH = "models/viking_room.obj";
-//const std::string MODEL_PATH = "models/statue_prova.obj";
+//const std::string MODEL_PATH = "models/davidStatue.obj";
 //const std::string MODEL_PATH = "models/hercules.obj";
-const std::string STRUCTURE_MODEL_PATH = "models/WallsAndFloor.obj";//"models/venus.obj";
+//const std::string DISCO_MODEL_PATH = "models/doors.obj";
+
+//@todo WallsAndFloor2 ha soffitto, meglio separarli?
+const std::string STRUCTURE_MODEL_PATH = "models/WallsAndFloor.obj"; //"models/WallsAndFloor2.obj";
 const std::string VENUS_MODEL_PATH = "models/venus.obj";
 const std::string DISCO_MODEL_PATH = "models/discobolus.obj";
-//const std::string DISCO_MODEL_PATH = "models/doors.obj";
+
+//Già posizionati:
+//const std::string VENUS_MODEL_PATH = "models/pedestal.obj";
+//const std::string DISCO_MODEL_PATH = "models/hercules.obj";
 
 //TEXTURE
 //const std::string TEXTURE_PATH = "textures/viking_room.png";
-//const std::string TEXTURE_PATH = "textures/DavidFixedDiff.jpg";
+//const std::string TEXTURE_PATH = "textures/davidTexture.jpg";
 //const std::string TEXTURE_PATH = "textures/hercules.jpg";
-const std::string STRUCTURE_TEXTURE_PATH = "textures/wall.jpg";//"textures/statue_venus.jpg";
-const std::string VENUS_TEXTURE_PATH = "textures/statue_venus.jpg";
-const std::string DISCO_TEXTURE_PATH = "textures/manstatue.png";
 //const std::string DISCO_TEXTURE_PATH = "textures/door.png";
+
+const std::string STRUCTURE_TEXTURE_PATH = "textures/floor_wall.png";
+const std::string VENUS_TEXTURE_PATH = "textures/statue_venus.jpg";
+const std::string DISCO_TEXTURE_PATH = "textures/discobolusTexture.png";
+//Già posizionati:
+//const std::string VENUS_TEXTURE_PATH = "textures/pedestal.jpg";
+//const std::string DISCO_TEXTURE_PATH = "textures/hercules.jpg";
 
 // The uniform buffer object used in this example
 //IT may be splitted in {view, proj}(set0, binding0) and {model}(set1, binding0)
@@ -380,10 +390,11 @@ class MyProject : public BaseProject {
         vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
 
         //For venus
-        ubo.model = /*glm::rotate(glm::mat4(1.0f),
+        ubo.model = idMatrix;/*glm::rotate(glm::mat4(1.0f),
                                 glm::radians(270.0f), //*time
-                                glm::vec3(1.0f, 0.0f, 0.0f))**/
-                    glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));;
+                                glm::vec3(1.0f, 0.0f, 0.0f))*
+                    glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));
+                    */
 		// Here is where you actually update your uniforms
         //Also duplicated!
 		vkMapMemory(device, DS_VENUS.uniformBuffersMemory[0][currentImage], 0,
