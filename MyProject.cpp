@@ -338,12 +338,7 @@ protected:
         void* data;
 
         float omega, mu, dt;
-        float rx = 0;
-        float ry = 0;
-        float rz = 0;
-        float mx = 0;
-        float my = 0;
-        float mz = 0;
+
         static glm::vec3 YPR = glm::vec3(glm::radians(0.0f), 0.0f, glm::radians(0.0f));
 
         static glm::vec3 ux = glm::vec3(glm::rotate(idMatrix, YPR.x,yAxis) *
@@ -353,7 +348,7 @@ protected:
                                         glm::vec4(0,0,-1,1));
 
         omega = 1; //[Rad/s]
-        mu = 1; //[unit/s]
+        mu = 10; //[unit/s]
 
         dt = computeDeltaTime();
 
