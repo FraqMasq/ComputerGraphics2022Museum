@@ -78,6 +78,11 @@ const std::string DISCO_TEXTURE_PATH = "textures/statues/discobolusTexture.png";
 struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
+    alignas(16) glm::vec3 lightPos1;
+    alignas(16) glm::vec3 lightPos2;
+    alignas(16) glm::vec3 lightColor;
+    alignas(16) glm::vec3 ambColor;
+    alignas(16) glm::vec4 coneInOutDecayExp;
 };
 
 struct UniformBufferObject {
@@ -408,6 +413,12 @@ protected:
 						swapChainExtent.width / (float) swapChainExtent.height,
 						0.1f, 50.0f);
 		gubo.proj[1][1] *= -1;
+
+        gubo.lightPos1 = glm::vec3(4.0f, 3.5f, 6.0f); //light between the statues
+        gubo.lightPos2 = glm::vec3(11.0f, -1.0f, 6.0f); //light for the paintings
+        gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
+        gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
+        gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 0.0f);
 
         vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
                     sizeof(gubo), 0, &data);

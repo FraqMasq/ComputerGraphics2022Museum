@@ -1,20 +1,17 @@
 #version 450
 
-layout(set=1, binding = 1) uniform sampler2D texSampler;
-/*
-layout(set= 1, binding = 2) uniform GlobalUniformBufferObject {
-	// Direct lights parameters (for diffuse and specular)
-	
-	vec3 lightDir; //the direction of the light. 
-	vec3 lightPos; //the position of the light.
+layout(set=0, binding = 0) uniform GlobalUniformBufferObject {
+	mat4 view;
+	mat4 proj;
+	vec3 lightPos1; //the position of the light.
+	vec3 lightPos2; //the position of the light.
 	vec3 lightColor; //the basic color of the light.
-	vec4 lightParams; //the other parameters of the spot light
-	
-	// Other parameters (not relevant for the exercise)
-	vec3 eyePos;
-	//vec4 selector;
+	vec3 ambColor; //the ambient color.
+	vec4 coneInOutDecayExp; //for point light
 } gubo;
-*/
+
+layout(set=1, binding = 1) uniform sampler2D texSampler;
+
 
 layout(location = 0) in vec3 fragViewDir;
 layout(location = 1) in vec3 fragNorm;
@@ -24,41 +21,43 @@ layout(location = 3) in vec3 fragPos;
 layout(location = 0) out vec4 outColor;
 
 vec3 compute_Color(vec3 N, vec3 V, vec3 Cd, vec3 Cs, float gamma) {
-	// Lambert + Phong specular + point light
+	// Lambert + Phong specular + point light + Ambient
 	// Parameters are:
 	//
 	// vec3 N : normal vector
 	// vec3 V : view direction
 	// vec3 Cd : main color (diffuse color)
-	// float sigma : roughness of the material
+	// vec3 Cs : specular Color
 	// float gamma: specular power
-	
-	//@todo add this in global uniform buffer object
-	vec3 lightPos = vec3 (3.0f, 3.0f, 6.58f);
-	vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
-	vec4 coneInOutDecayExp = vec4(0.9f, 0.92f, 2.0f, 0.0f);
 	
 	
 	//Point light dir
-	vec3 dir = normalize(lightPos - fragPos);
+	vec3 dir1 = normalize(gubo.lightPos1 - fragPos);
+	vec3 dir2 = normalize(gubo.lightPos2 - fragPos);
 	
 	//Point light color
-	vec3 col = pow(coneInOutDecayExp.z/length(fragPos - lightPos), coneInOutDecayExp.w) * lightColor;
+	vec3 col1 = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.lightPos1), gubo.coneInOutDecayExp.w) * gubo.lightColor;
+	vec3 col2 = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.lightPos2), gubo.coneInOutDecayExp.w) * gubo.lightColor;
 	
 	//Lambert
-	float cos_a = dot(N, dir); 
-	vec3 f_diff = Cd * clamp(cos_a, 0, 1);
+	float cos_a1 = dot(N, dir1);
+	float cos_a2 = dot(N, dir2); 
+	vec3 f_diff1 = Cd * clamp(cos_a1, 0, 1);
+	vec3 f_diff2 = Cd * clamp(cos_a2, 0, 1);
 	
 	//Phong
-	vec3 r_lx = -reflect(dir, N);
+	vec3 r_lx1 = -reflect(dir1, N);
+	vec3 r_lx2 = -reflect(dir2, N);
 	
-	vec3 f_spec = Cs * pow(clamp (dot(V,r_lx), 0,1), gamma);
+	vec3 f_spec1 = Cs * pow(clamp (dot(V,r_lx1), 0,1), gamma);
+	vec3 f_spec2 = Cs * pow(clamp (dot(V,r_lx2), 0,1), gamma);
 	
 	//Ambient
-	vec3 ambient  = (vec3(0.1f,0.1f, 0.1f) * (1.0f + N.y) + vec3(0.0f,0.0f, 0.1f) * (1.0f - N.y)) * Cd;
+	//vec3 ambient  = (vec3(0.1f,0.1f, 0.1f) * (1.0f + N.y) + vec3(0.0f,0.0f, 0.1f) * (1.0f - N.y)) * Cd;
+	vec3 ambient = gubo.ambColor*Cd;
 	
 	//@todo check if this is the correct way to add ambient light
-	vec3 computed_col = col*(f_diff + f_spec) + ambient ; 
+	vec3 computed_col = col1*(f_diff1 + f_spec1) +col2 * (f_diff2 + f_spec2) + ambient ; 
 	return computed_col;
 }
 

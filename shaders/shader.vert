@@ -3,6 +3,11 @@
 layout(set=0, binding = 0) uniform GlobalUniformBufferObject {
 	mat4 view;
 	mat4 proj;
+	vec3 lightPos1; //the position of the light.
+	vec3 lightPos2; //the position of the light.
+	vec3 lightColor; //the basic color of the light.
+	vec3 ambColor; //the ambient color.
+	vec4 coneInOutDecayExp;
 } gubo;
 
 layout(set=1, binding = 0) uniform UniformBufferObject {
