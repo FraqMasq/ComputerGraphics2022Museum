@@ -3,7 +3,7 @@
 #include "MyProject.hpp"
 
 //used to index AssetVector and ComponentVector
-enum ASSETS {STRUCTURE, VENUS, DISCOBOLUS};
+enum ASSETS {STRUCTURE, VENUS, DISCOBOLUS, PEDESTAL, HERCULES};
 
 struct Asset {
     const std::string ObjPath;
@@ -22,14 +22,24 @@ struct Component {
 const std::vector<Asset> AssetVector = {
         {"models/misc/WallsAndFloor2.obj", "textures/misc/floor_wall.png", {0,0.0, 0.0}, 1.0},
         {"models/statues/venus.obj", "textures/statues/statue_venus.jpg", {0,0.0, 0.0}, 1.0},
-        {"models/statues/discobolus.obj", "textures/statues/discobolusTexture.png", {0,0.0, 0.0}, 1.0}
+        {"models/statues/discobolus.obj", "textures/statues/discobolusTexture.png", {0,0.0, 0.0}, 1.0},
+        {"models/statues/pedestal.obj", "textures/statues/pedestal.jpg", {0,0.0, 0.0}, 1.0},
+        {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {0,0.0, 0.0}, 1.0},
+        {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {0,0.0, 0.0}, 1.0},
+
+        {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0,0.0, 0.0}, 1.0},
+        {"models/paints/Bathers.obj", "textures/paints/theBathers_Cezanne.jpg", {0,0.0, 0.0}, 1.0},
+        {"models/paints/Munch.obj", "textures/paints/Munch_Scream.jpg", {0,0.0, 0.0}, 1.0},
+        {"models/paints/VanGogh.obj", "textures/paints/VanGogh_self.jpg", {0,0.0, 0.0}, 1.0}
+
 };
+
+const int numAssets = 10;//6;
 
 //MODEL
 //@todo usare AssetVector, indicizzato tramite enum ASSETS
 //const std::string MODEL_PATH = "models/viking_room.obj";
 //const std::string MODEL_PATH = "models/statues/davidStatue.obj";
-//const std::string MODEL_PATH = "models/statues/hercules.obj";
 //const std::string DISCO_MODEL_PATH = "models/misc/doors.obj";
 
 
@@ -135,9 +145,9 @@ protected:
 		initialBackgroundColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		
 		// Descriptor pool sizes -> modify if add other models
-		uniformBlocksInPool = 4;
-		texturesInPool = 3;
-		setsInPool = 8;
+		uniformBlocksInPool = numAssets+1;
+		texturesInPool = numAssets;
+		setsInPool = numAssets+1;
 	}
 	
 	// Here you load and setup all your Vulkan objects
@@ -244,14 +254,40 @@ protected:
                                 0, nullptr);
 
 
-        //@todo iterare con for?
-
         VkDeviceSize offsets[] = {0};
 
-		VkBuffer vertexBuffers[] = {componentsVector[VENUS].M.vertexBuffer};
+		VkBuffer vertexBuffers[numAssets][1];
+        for(int i = 0; i < numAssets; i++){
+            vertexBuffers[i][0] = componentsVector[i].M.vertexBuffer;
+            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[i], offsets);
+            // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
+            vkCmdBindIndexBuffer(commandBuffer, componentsVector[i].M.indexBuffer, 0,
+                                 VK_INDEX_TYPE_UINT32);
+
+            // property .pipelineLayout of a pipeline contains its layout.
+            // property .descriptorSets of a descriptor set contains its elements.
+            vkCmdBindDescriptorSets(commandBuffer,
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    P1.pipelineLayout, 1, 1, &componentsVector[i].DS.descriptorSets[currentImage],
+                                    0, nullptr);
+
+
+
+            // property .indices.size() of models, contains the number of triangles * 3 of the mesh.
+            vkCmdDrawIndexed(commandBuffer,
+                             static_cast<uint32_t>(componentsVector[i].M.indices.size()), 1, 0, 0, 0);
+
+        }
+
+        /* = {componentsVector[STRUCTURE].M.vertexBuffer,
+                                    componentsVector[VENUS].M.vertexBuffer,
+                                    componentsVector[DISCOBOLUS].M.vertexBuffer};
+
+
 		// property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
 		//VkDeviceSize offsets[] = {0};
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[VENUS], offsets);
 		// property .indexBuffer of models, contains the VkBuffer handle to its index buffer
 		vkCmdBindIndexBuffer(commandBuffer, componentsVector[VENUS].M.indexBuffer, 0,
 								VK_INDEX_TYPE_UINT32);
@@ -269,10 +305,11 @@ protected:
 		vkCmdDrawIndexed(commandBuffer,
 					static_cast<uint32_t>(componentsVector[VENUS].M.indices.size()), 1, 0, 0, 0);
 
+
         VkBuffer vertexBuffersDisco[] = {componentsVector[DISCOBOLUS].M.vertexBuffer};
         // property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
         VkDeviceSize offsetsDisco[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffersDisco, offsets);
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[DISCOBOLUS], offsets);
         // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
         vkCmdBindIndexBuffer(commandBuffer, componentsVector[DISCOBOLUS].M.indexBuffer, 0,
                              VK_INDEX_TYPE_UINT32);
@@ -286,7 +323,7 @@ protected:
 
         VkBuffer vertexBuffersStruct[] = {componentsVector[STRUCTURE].M.vertexBuffer};
         VkDeviceSize offsetsStruct[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffersStruct, offsets);
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[STRUCTURE], offsets);
         vkCmdBindIndexBuffer(commandBuffer, componentsVector[STRUCTURE].M.indexBuffer, 0,
                              VK_INDEX_TYPE_UINT32);
         vkCmdBindDescriptorSets(commandBuffer,
@@ -295,7 +332,7 @@ protected:
                                 0, nullptr);
         vkCmdDrawIndexed(commandBuffer,
                          static_cast<uint32_t>(componentsVector[STRUCTURE].M.indices.size()), 1, 0, 0, 0);
-
+*/
 	}
 
 
@@ -402,11 +439,6 @@ protected:
 
         gubo.view = LookInDirMat(camPos, YPR);
 
-        /*
-		gubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
-							   glm::vec3(0.0f, 0.0f, 0.0f),
-							   glm::vec3(0.0f, 0.0f, 1.0f));
-        */
 
 
 		gubo.proj = glm::perspective(glm::radians(45.0f),
@@ -425,43 +457,19 @@ protected:
         memcpy(data, &gubo, sizeof(gubo));
         vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
 
-        //For venus
-        ubo.model = idMatrix;/*glm::rotate(glm::mat4(1.0f),
+        for(int i = 0; i < numAssets; i++){
+            ubo.model = idMatrix;/*glm::rotate(glm::mat4(1.0f),
                                 glm::radians(270.0f), //*time
                                 glm::vec3(1.0f, 0.0f, 0.0f))*
                     glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));
                     */
-		// Here is where you actually update your uniforms
-        //Also duplicated!
-        //@todo for over vector?
-		vkMapMemory(device, componentsVector[VENUS].DS.uniformBuffersMemory[0][currentImage], 0,
-							sizeof(ubo), 0, &data);
-		memcpy(data, &ubo, sizeof(ubo));
-		vkUnmapMemory(device, componentsVector[VENUS].DS.uniformBuffersMemory[0][currentImage]);
+            vkMapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage], 0,
+                        sizeof(ubo), 0, &data);
+            memcpy(data, &ubo, sizeof(ubo));
+            vkUnmapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage]);
+        }
+	}
 
-        //For discobolus
-        ubo.model = idMatrix; /*glm::rotate(glm::mat4(1.0f),
-                                glm::radians(270.0f), //*time
-                                glm::vec3(1.0f, 0.0f, 0.0f)) *
-                                        glm::translate(glm::mat4(3.0f), glm::vec3(1.5f, 0.0f, 0.0f));
-        */
-        // Here is where you actually update your uniforms
-        //Also duplicated!
-        vkMapMemory(device, componentsVector[DISCOBOLUS].DS.uniformBuffersMemory[0][currentImage], 0,
-                    sizeof(ubo), 0, &data);
-        memcpy(data, &ubo, sizeof(ubo));
-        vkUnmapMemory(device, componentsVector[DISCOBOLUS].DS.uniformBuffersMemory[0][currentImage]);
-
-
-        //For Structure
-        ubo.model = idMatrix;
-        vkMapMemory(device, componentsVector[STRUCTURE].DS.uniformBuffersMemory[0][currentImage], 0,
-                    sizeof(ubo), 0, &data);
-        memcpy(data, &ubo, sizeof(ubo));
-        vkUnmapMemory(device, componentsVector[STRUCTURE].DS.uniformBuffersMemory[0][currentImage]);
-
-
-	}	
 };
 
 // This is the main: probably you do not need to touch this!
