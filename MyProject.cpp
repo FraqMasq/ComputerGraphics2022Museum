@@ -12,6 +12,13 @@ struct Asset {
     const float scale;
 };
 
+struct Map {
+    stbi_uc* museumMap;
+    int museumMapWidth, museumMapHeight;
+    void loadMap();
+};
+
+
 struct Component {
     Model M;
     Texture T;
@@ -57,6 +64,7 @@ const std::vector<Asset> AssetVector = {
 const std::string STRUCTURE_TEXTURE_PATH = "textures/misc/floor_wall.png";
 const std::string VENUS_TEXTURE_PATH = "textures/statues/statue_venus.jpg";
 const std::string DISCO_TEXTURE_PATH = "textures/statues/discobolusTexture.png";
+const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
 
 //const std::string VENUS_TEXTURE_PATH = "textures/paints/T_picture_frame_BaseColor.tga";
 //const std::string DISCO_TEXTURE_PATH = "textures/paints/Munch_Scream.jpg";
@@ -113,8 +121,8 @@ class MyProject : public BaseProject {
 
     DescriptorSet DS_GLOBAL;
 
-
-
+    Map museumMap;
+    
 
     std::vector<Component> componentsVector;
 
@@ -192,6 +200,8 @@ protected:
         DS_GLOBAL.init(this, &DSLGlobal, {
                 {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
         });
+
+        museumMap.loadMap();
 	
 	}
 
@@ -358,7 +368,7 @@ protected:
                                         glm::vec4(0,0,-1,1));
 
         omega = 1; //[Rad/s]
-        mu = 1; //[unit/s]
+        mu = 6; //[unit/s]
 
         dt = computeDeltaTime();
 
@@ -399,11 +409,11 @@ protected:
         }
 
 
-        /*@todo implement canStep to enable stopping the movement (A06.cpp)
+        // @todo implement canStep to enable stopping the movement (A06.cpp)
         if(!canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
         }
-        */
+        
 
         gubo.view = LookInDirMat(camPos, YPR);
 
@@ -466,8 +476,43 @@ protected:
         vkUnmapMemory(device, componentsVector[STRUCTURE].DS.uniformBuffersMemory[0][currentImage]);
 
 
-	}	
+	}
+    bool canStepPoint(float x, float y) {
+        //museumMap.museumMapWidth/16.0 -> pixel in 1 meter
+        //added 0.5 and 6 because floor is not centered in zero
+        int pixX = round(fmax(0.0f, fmin(museumMap.museumMapWidth - 1, ((x + 8 - 5) * museumMap.museumMapWidth / 16.0 )))); //20
+        int pixY = round(fmax(0.0f, fmin(museumMap.museumMapHeight - 1, ((y + 9.5 -0.5) * museumMap.museumMapHeight / 19.0)))); //20
+        int pix = (int)museumMap.museumMap[museumMap.museumMapWidth * pixY + pixX];	
+        return pix > 128; //check if pixel is white (?)
+    }
+    const float checkRadius = 0.1; 
+    const int checkSteps = 12; //12
+
+    bool canStep(float x, float y) {
+        for (int i = 0; i < checkSteps; i++) {
+            if (!canStepPoint(x + cos(6.2832 * i / (float)checkSteps) * checkRadius,
+                y + sin(6.2832 * i / (float)checkSteps) * checkRadius)) {
+                std::cout << "Hit something \n";
+
+                return false;
+            }
+        }
+        return true;
+    }
+    
 };
+
+void Map::loadMap() {
+    museumMap = stbi_load(MAP_TEXTURE_PATH.c_str(),
+        &museumMapWidth, &museumMapHeight,
+        NULL, 1);
+    if (!museumMap) {
+        std::cout << MAP_TEXTURE_PATH.c_str() << "\n";
+        throw std::runtime_error("failed to load map image!");
+    }
+    std::cout << "Station map -> size: " << museumMapWidth
+        << "x" << museumMapHeight << "\n";
+}
 
 // This is the main: probably you do not need to touch this!
 int main() {
