@@ -2,8 +2,7 @@
 
 #include "MyProject.hpp"
 
-//used to index AssetVector and ComponentVector
-enum ASSETS {STRUCTURE, VENUS, DISCOBOLUS, PEDESTAL, HERCULES};
+
 
 struct Asset {
     const std::string ObjPath;
@@ -41,7 +40,11 @@ const std::vector<Asset> AssetVector = {
 
 };
 
-const int numAssets = 10;//6;
+const int numAssets = 10;
+
+//used to index AssetVector and ComponentVector
+enum ASSETS {STRUCTURE, VENUS, DISCOBOLUS, PEDESTAL, HERCULES, DAVID, FRAMES, BATHERS, MUNCH, VANGOGH};
+
 
 //MODEL
 //@todo usare AssetVector, indicizzato tramite enum ASSETS
@@ -234,8 +237,8 @@ protected:
 
         DS_GLOBAL.cleanup();
 
-        P1.cleanup();
-        DSLGlobal.cleanup();
+		//P1.cleanup();
+		DSLGlobal.cleanup();
         DSLObj.cleanup();
     }
 
@@ -404,6 +407,11 @@ protected:
 
         dt = computeDeltaTime();
 
+        int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
+        int axesCount;
+        const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+        //std::cout << present << "\tAxes available:" << axesCount<< "\n";
+        //std::cout << "Left X axis:"<< axes[0] << "\n";
         glm::vec3 oldPos = camPos;
         if (glfwGetKey(window, GLFW_KEY_LEFT)) {
             YPR.x += dt * omega;
@@ -473,6 +481,13 @@ protected:
                                 glm::vec3(1.0f, 0.0f, 0.0f))*
                     glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));
                     */
+            /*
+             // @todo ruota intorno origine, deve ruotare l'oggetto
+              if(i == HERCULES){
+                ubo.model = ubo.model *
+                        glm::rotate(idMatrix, glm::radians(270.0f) * time,
+                        glm::vec3(0.0f, 1.0f, 0.0f));
+            }*/
             vkMapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage], 0,
                 sizeof(ubo), 0, &data);
             memcpy(data, &ubo, sizeof(ubo));
