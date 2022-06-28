@@ -411,13 +411,9 @@ protected:
         int axesCount;
         const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
         std::cout << present << "\tAxes available:" << axesCount<< "\n";
-        if(present == 1) {
-            //std::cout << "Left X axis:" << axes[0] << "\n";
-            std::cout << "Left Y axis:" << axes[5] << "\n";
-            std::cout << "Right X axis:" << axes[4] << "\n";
-            std::cout << "Right Y axis:" << axes[3] << "\n";
+        if(present == 1 && axesCount != 6) {
+            present = 0;
         }
-
         glm::vec3 oldPos = camPos;
         if (glfwGetKey(window, GLFW_KEY_LEFT) or (present== 1 and axes[2] <= -0.5)) {
             YPR.x += dt * omega;
