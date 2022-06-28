@@ -410,19 +410,25 @@ protected:
         int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
         int axesCount;
         const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-        //std::cout << present << "\tAxes available:" << axesCount<< "\n";
-        //std::cout << "Left X axis:"<< axes[0] << "\n";
+        std::cout << present << "\tAxes available:" << axesCount<< "\n";
+        if(present == 1) {
+            //std::cout << "Left X axis:" << axes[0] << "\n";
+            std::cout << "Left Y axis:" << axes[5] << "\n";
+            std::cout << "Right X axis:" << axes[4] << "\n";
+            std::cout << "Right Y axis:" << axes[3] << "\n";
+        }
+
         glm::vec3 oldPos = camPos;
-        if (glfwGetKey(window, GLFW_KEY_LEFT)) {
+        if (glfwGetKey(window, GLFW_KEY_LEFT) or (present== 1 and axes[2] <= -0.5)) {
             YPR.x += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_RIGHT)) {
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) or (present== 1 and axes[2] >= 0.5)) {
             YPR.x -= dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_UP)) {
+        if (glfwGetKey(window, GLFW_KEY_UP) or (present== 1 and axes[5] <= -0.5)) {
             YPR.y += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_DOWN)) {
+        if (glfwGetKey(window, GLFW_KEY_DOWN) or (present== 1 and axes[5] >= 0.5)) {
             YPR.y -= dt * omega;
         }
         if (glfwGetKey(window, GLFW_KEY_Q)) {
@@ -431,19 +437,19 @@ protected:
         if (glfwGetKey(window, GLFW_KEY_E)) {
             YPR.z += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_A)) {
+        if (glfwGetKey(window, GLFW_KEY_A)  or (present== 1 and axes[0] <= -0.5)) {
             camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1, 0, 0, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_D)) {
+        if (glfwGetKey(window, GLFW_KEY_D) or (present== 1 and axes[0] >= 0.5)) {
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1, 0, 0, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_W)) {
+        if (glfwGetKey(window, GLFW_KEY_W)  or (present== 1 and axes[1] <= -0.5)) {
             camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_S)) {
+        if (glfwGetKey(window, GLFW_KEY_S)  or (present== 1 and axes[1] >= 0.5)) {
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
