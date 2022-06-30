@@ -99,8 +99,15 @@ const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
 struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
+    alignas(16) glm::vec3 lightDir;
+    //alignas(16) glm::vec3 lightDir2;
+    //alignas(16) glm::vec3 lightDir3;
     alignas(16) glm::vec3 lightPos1;
     alignas(16) glm::vec3 lightPos2;
+    alignas(16) glm::vec3 spotPos1; //the position of the light.
+    alignas(16) glm::vec3 spotPos2; //the position of the light.
+    alignas(16) glm::vec3 spotPos3; //the position of the light.
+    alignas(16) glm::vec3 spotPos4; //the position of the light.
     alignas(16) glm::vec3 lightColor;
     alignas(16) glm::vec3 ambColor;
     alignas(16) glm::vec4 coneInOutDecayExp;
@@ -410,21 +417,21 @@ protected:
         int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
         int axesCount;
         const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-        std::cout << present << "\tAxes available:" << axesCount<< "\n";
+       // std::cout << present << "\tAxes available:" << axesCount<< "\n";
         if(present == 1 && axesCount != 6) {
             present = 0;
         }
         glm::vec3 oldPos = camPos;
-        if (glfwGetKey(window, GLFW_KEY_LEFT) or (present== 1 and axes[2] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_LEFT) || (present== 1 && axes[2] <= -0.5)) {
             YPR.x += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) or (present== 1 and axes[2] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) || (present== 1 && axes[2] >= 0.5)) {
             YPR.x -= dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_UP) or (present== 1 and axes[5] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_UP) || (present== 1 && axes[5] <= -0.5)) {
             YPR.y += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_DOWN) or (present== 1 and axes[5] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_DOWN) || (present== 1 && axes[5] >= 0.5)) {
             YPR.y -= dt * omega;
         }
         if (glfwGetKey(window, GLFW_KEY_Q)) {
@@ -433,19 +440,19 @@ protected:
         if (glfwGetKey(window, GLFW_KEY_E)) {
             YPR.z += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_A)  or (present== 1 and axes[0] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_A)  || (present== 1 && axes[0] <= -0.5)) {
             camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1, 0, 0, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_D) or (present== 1 and axes[0] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_D) || (present== 1 && axes[0] >= 0.5)) {
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1, 0, 0, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_W)  or (present== 1 and axes[1] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_W)  || (present== 1 && axes[1] <= -0.5)) {
             camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_S)  or (present== 1 and axes[1] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_S)  || (present== 1 && axes[1] >= 0.5)) {
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
@@ -466,11 +473,16 @@ protected:
             0.1f, 50.0f);
         gubo.proj[1][1] *= -1;
 
+        gubo.lightDir = glm::vec3(cos(glm::radians(45.0f)), sin(glm::radians(45.0f)), 0.0f);
         gubo.lightPos1 = glm::vec3(4.0f, 3.5f, 6.0f); //light between the statues
         gubo.lightPos2 = glm::vec3(11.0f, -1.0f, 6.0f); //light for the paintings
+        gubo.spotPos1 = glm::vec3(1.3f, 5.0f, -7.3f); //Discobolus
+        gubo.spotPos2 = glm::vec3(6.3f, 5.0f, -7.3f); //venus
+        gubo.spotPos3 = glm::vec3(6.5f, 5.0f, -1.3f); //david
+        gubo.spotPos4 = glm::vec3(1.5f, 5.0f, -2.6f); //hercules
         gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
-        gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 0.0f);
+        gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 1.0f);
 
         vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
             sizeof(gubo), 0, &data);
