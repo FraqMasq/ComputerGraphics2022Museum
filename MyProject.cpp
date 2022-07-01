@@ -99,15 +99,10 @@ const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
 struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
-    alignas(16) glm::vec3 lightDir;
-    //alignas(16) glm::vec3 lightDir2;
-    //alignas(16) glm::vec3 lightDir3;
     alignas(16) glm::vec3 lightPos1;
     alignas(16) glm::vec3 lightPos2;
-    alignas(16) glm::vec3 spotPos1; //the position of the light.
-    alignas(16) glm::vec3 spotPos2; //the position of the light.
-    alignas(16) glm::vec3 spotPos3; //the position of the light.
-    alignas(16) glm::vec3 spotPos4; //the position of the light.
+    alignas(16) glm::vec3 spotDir[4]; //the direction of spot lights
+    alignas(16) glm::vec3 spotPositions[4]; //the position of the light.
     alignas(16) glm::vec3 lightColor;
     alignas(16) glm::vec3 ambColor;
     alignas(16) glm::vec4 coneInOutDecayExp;
@@ -473,13 +468,35 @@ protected:
             0.1f, 50.0f);
         gubo.proj[1][1] *= -1;
 
-        gubo.lightDir = glm::vec3(cos(glm::radians(45.0f)), sin(glm::radians(45.0f)), 0.0f);
         gubo.lightPos1 = glm::vec3(4.0f, 3.5f, 6.0f); //light between the statues
         gubo.lightPos2 = glm::vec3(11.0f, -1.0f, 6.0f); //light for the paintings
-        gubo.spotPos1 = glm::vec3(1.3f, 5.0f, -7.3f); //Discobolus
-        gubo.spotPos2 = glm::vec3(6.3f, 5.0f, -7.3f); //venus
-        gubo.spotPos3 = glm::vec3(6.5f, 5.0f, -1.3f); //david
-        gubo.spotPos4 = glm::vec3(1.5f, 5.0f, -2.6f); //hercules
+        gubo.spotPositions[0] = glm::vec3(1.3f, 5.0f, -7.3f); //Discobolus
+        gubo.spotPositions[1] = glm::vec3(6.3f, 5.0f, -7.3f); //venus
+        gubo.spotPositions[2] = glm::vec3(6.5f, 5.0f, -1.3f); //david
+        gubo.spotPositions[3] = glm::vec3(1.5f, 5.0f, -2.6f); //hercules
+
+        /*when positions will be added
+        float theta = atan(AssetVector[2].pos.z - gubo.spotPositions[0].z , AssetVector[2].pos.x - gubo.spotPositionss[0].x);
+         gubo.spotDir[0] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = atan(AssetVector[1].pos.z - gubo.spotPositions[1].z , AssetVector[1].pos.x - gubo.spotPositions[1].x);
+         gubo.spotDir[1] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = atan(AssetVector[4].pos.z - gubo.spotPositions[2].z , AssetVector[4].pos.x - gubo.spotPositions[2].x);
+         gubo.spotDir[2] = glm::vec3(cos(theta), sin(theta), 0.0f);
+         theta = atan(AssetVector[3].pos.z - gubo.spotPositions[3].z , AssetVector[3].pos.x - gubo.spotPositions[3].x);
+         gubo.spotDir[3] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        */
+
+        //set correct direction as angle atan(y,x) where y and x are differences between y and x coordinate of 
+        //statues and spotlights
+        float theta = glm::atan(7.3f - gubo.spotPositions[0].z, 1.3f - gubo.spotPositions[0].x);
+        gubo.spotDir[0] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = glm::atan(7.5f - gubo.spotPositions[1].z, 6.2f - gubo.spotPositions[1].x);
+        gubo.spotDir[1] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = glm::atan(3.0f - gubo.spotPositions[2].z, 0.5f - gubo.spotPositions[2].x);
+        gubo.spotDir[2] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = glm::atan(1.3f - gubo.spotPositions[3].z, 7.6f - gubo.spotPositions[3].x);
+        gubo.spotDir[3] = glm::vec3(cos(theta), sin(theta), 0.0f);
+
         gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
         gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 1.0f);
