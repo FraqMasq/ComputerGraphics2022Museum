@@ -35,9 +35,9 @@ const std::vector<Asset> AssetVector = {
         {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {7.578,0.0, -1.291}, 1.0},
 
         {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0.0,0.0, 0.0}, 1.0},
-        {"models/paints/Bathers.obj", "textures/paints/theBathers_Cezanne.jpg", {0.0,0.0, 0.0}, 1.0},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/theBathers_Cezanne.jpg", {9.393, 2.842, 1.641}, 1.0},
         {"models/paints/Munch.obj", "textures/paints/Munch_Scream.jpg", {0.0,0.0, 0.0}, 1.0},
-        {"models/paints/VanGogh.obj", "textures/paints/VanGogh_self.jpg", {0.0,0.0, 0.0}, 1.0}
+        {"models/paints/VerticalPicture.obj", "textures/paints/VanGogh_self.jpg", {13.97, 3.558, 2.558}, 1.0}
 
 };
 
