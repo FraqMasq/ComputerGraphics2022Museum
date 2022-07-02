@@ -34,6 +34,14 @@ const std::vector<Asset> AssetVector = {
         {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {-0.5,1.653, -2.989}, 1.0},
         {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {7.578,0.0, -1.291}, 1.0},
 
+        /*
+        float theta = glm::atan(7.3f , 1.3f ); -> -7.2, 1.4
+        theta = glm::atan(7.5f , 6.2f ); -> -7.3, 6.2
+        theta = glm::atan(3.0f , 0.5f ); -> -3, -0.5
+        theta = glm::atan(1.3f , 7.6f ); -> -1.3 7.6
+        */
+        
+
         {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0.0,0.0, 0.0}, 1.0},
         {"models/paints/HorizontalPicture.obj", "textures/paints/theBathers_Cezanne.jpg", {9.393, 2.842, 1.641}, 1.0},
         {"models/paints/VerticalPicture.obj", "textures/paints/Munch_Scream.jpg", {13.97, 3.558, -1.757}, 1.0},
@@ -100,15 +108,10 @@ const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
 struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
-    alignas(16) glm::vec3 lightDir;
-    //alignas(16) glm::vec3 lightDir2;
-    //alignas(16) glm::vec3 lightDir3;
     alignas(16) glm::vec3 lightPos1;
     alignas(16) glm::vec3 lightPos2;
-    alignas(16) glm::vec3 spotPos1; //the position of the light.
-    alignas(16) glm::vec3 spotPos2; //the position of the light.
-    alignas(16) glm::vec3 spotPos3; //the position of the light.
-    alignas(16) glm::vec3 spotPos4; //the position of the light.
+    alignas(16) glm::vec3 spotDir[4]; //the direction of spot lights
+    alignas(16) glm::vec3 spotPositions[4]; //the position of the light.
     alignas(16) glm::vec3 lightColor;
     alignas(16) glm::vec3 ambColor;
     alignas(16) glm::vec4 coneInOutDecayExp;
@@ -474,16 +477,32 @@ protected:
             0.1f, 50.0f);
         gubo.proj[1][1] *= -1;
 
-        gubo.lightDir = glm::vec3(cos(glm::radians(45.0f)), sin(glm::radians(45.0f)), 0.0f);
         gubo.lightPos1 = glm::vec3(4.0f, 6.15f, -3.247f); //light between the statues
         gubo.lightPos2 = glm::vec3(11.57f, 6.515f, 7.192f); //light for the paintings
-        gubo.spotPos1 = glm::vec3(1.3f, 5.0f, -7.3f); //Discobolus
-        gubo.spotPos2 = glm::vec3(6.3f, 5.0f, -7.3f); //venus
-        gubo.spotPos3 = glm::vec3(6.5f, 5.0f, -1.3f); //david
-        gubo.spotPos4 = glm::vec3(1.5f, 5.0f, -2.6f); //hercules
+        gubo.spotPositions[0] = glm::vec3(1.3f, 4.0f, -5.3f); //Discobolus
+        gubo.spotPositions[1] = glm::vec3(6.3f, 4.0f, -5.2f); //venus
+        gubo.spotPositions[2] = glm::vec3(4.5f, 4.0f, -1.3f); //david
+        gubo.spotPositions[3] = glm::vec3(2.0f, 4.0f, -3.0f); //hercules
+
+
+        //set correct direction as angle atan(y,x) where y and x are differences between y and x coordinate of 
+        //statues and spotlights
+        //float theta = glm::atan(AssetVector[2].pos.z - gubo.spotPositions[0].z, AssetVector[2].pos.x - gubo.spotPositions[0].x);
+        float theta = glm::radians(90.0f);
+         gubo.spotDir[0] = glm::vec3(cos(theta), sin(theta), 0.7f);
+        //theta = glm::atan(glm::abs(AssetVector[1].pos.z - gubo.spotPositions[1].z) , glm::abs(AssetVector[1].pos.x - gubo.spotPositions[1].x));
+         gubo.spotDir[1] = glm::vec3(cos(theta), sin(theta), 0.7f);
+        //theta = glm::atan(glm::abs(AssetVector[5].pos.z - gubo.spotPositions[2].z) , glm::abs(AssetVector[5].pos.x - gubo.spotPositions[2].x));
+         theta = glm::radians(160.0f);
+         gubo.spotDir[2] = glm::vec3(cos(theta), sin(theta), 0.0f);
+         //theta = glm::atan(glm::abs(AssetVector[4].pos.z - gubo.spotPositions[3].z) , glm::abs(AssetVector[4].pos.x - gubo.spotPositions[3].x));
+         theta = glm::radians(20.0f);
+         gubo.spotDir[3] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        
+
         gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
-        gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 1.0f);
+        gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 2.0f);
 
         vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
             sizeof(gubo), 0, &data);
