@@ -26,17 +26,18 @@ struct Component {
 
 
 const std::vector<Asset> AssetVector = {
-        {"models/misc/WallsAndFloor2.obj", "textures/misc/floor_wall.png", {0,0.0, 0.0}, 1.0},
-        {"models/statues/venus.obj", "textures/statues/statue_venus.jpg", {0,0.0, 0.0}, 1.0},
-        {"models/statues/discobolus.obj", "textures/statues/discobolusTexture.png", {0,0.0, 0.0}, 1.0},
-        {"models/statues/pedestal.obj", "textures/statues/pedestal.jpg", {0,0.0, 0.0}, 1.0},
-        {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {0,0.0, 0.0}, 1.0},
-        {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {0,0.0, 0.0}, 1.0},
+        {"models/misc/WallsAndFloor2.obj", "textures/misc/floor_wall.png", {0.0,0.0, 0.0}, 1.0},
 
-        {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0,0.0, 0.0}, 1.0},
-        {"models/paints/Bathers.obj", "textures/paints/theBathers_Cezanne.jpg", {0,0.0, 0.0}, 1.0},
-        {"models/paints/Munch.obj", "textures/paints/Munch_Scream.jpg", {0,0.0, 0.0}, 1.0},
-        {"models/paints/VanGogh.obj", "textures/paints/VanGogh_self.jpg", {0,0.0, 0.0}, 1.0}
+        {"models/statues/venus.obj", "textures/statues/statue_venus.jpg", {6.222,0.0, -7.317}, 1.0},
+        {"models/statues/discobolus.obj", "textures/statues/discobolusTexture.png", {1.416,0.0, -7.204}, 1.0},
+        {"models/statues/pedestal.obj", "textures/statues/pedestal.jpg", {-0.5,0.0, -3.001}, 1.0},
+        {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {-0.5,1.653, -2.989}, 1.0},
+        {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {7.578,0.0, -1.291}, 1.0},
+
+        {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0.0,0.0, 0.0}, 1.0},
+        {"models/paints/Bathers.obj", "textures/paints/theBathers_Cezanne.jpg", {0.0,0.0, 0.0}, 1.0},
+        {"models/paints/Munch.obj", "textures/paints/Munch_Scream.jpg", {0.0,0.0, 0.0}, 1.0},
+        {"models/paints/VanGogh.obj", "textures/paints/VanGogh_self.jpg", {0.0,0.0, 0.0}, 1.0}
 
 };
 
@@ -410,7 +411,7 @@ protected:
         int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
         int axesCount;
         const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-        std::cout << present << "\tAxes available:" << axesCount<< "\n";
+        //std::cout << present << "\tAxes available:" << axesCount<< "\n";
         if(present == 1 && axesCount != 6) {
             present = 0;
         }
@@ -466,8 +467,8 @@ protected:
             0.1f, 50.0f);
         gubo.proj[1][1] *= -1;
 
-        gubo.lightPos1 = glm::vec3(4.0f, 3.5f, 6.0f); //light between the statues
-        gubo.lightPos2 = glm::vec3(11.0f, -1.0f, 6.0f); //light for the paintings
+        gubo.lightPos1 = glm::vec3(4.0f, 6.15f, -3.247f); //light between the statues
+        gubo.lightPos2 = glm::vec3(11.57f, 6.515f, 7.192f); //light for the paintings
         gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
         gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 0.0f);
@@ -478,11 +479,8 @@ protected:
         vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
 
         for (int i = 0; i < numAssets; i++) {
-            ubo.model = idMatrix;/*glm::rotate(glm::mat4(1.0f),
-                                glm::radians(270.0f), //*time
-                                glm::vec3(1.0f, 0.0f, 0.0f))*
-                    glm::translate(glm::mat4(3.0f), glm::vec3(-1.5f, 0.0f, 0.0f));
-                    */
+            ubo.model = glm::translate(idMatrix, AssetVector[i].pos); ;
+
             /*
              // @todo ruota intorno origine, deve ruotare l'oggetto
               if(i == HERCULES){
