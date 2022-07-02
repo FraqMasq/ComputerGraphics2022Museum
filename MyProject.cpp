@@ -102,6 +102,8 @@ struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 proj;
     alignas(16) glm::vec3 lightPos1;
     alignas(16) glm::vec3 lightPos2;
+    alignas(16) glm::vec3 spotDir[4]; //the direction of spot lights
+    alignas(16) glm::vec3 spotPositions[4]; //the position of the light.
     alignas(16) glm::vec3 lightColor;
     alignas(16) glm::vec3 ambColor;
     alignas(16) glm::vec4 coneInOutDecayExp;
@@ -411,21 +413,21 @@ protected:
         int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
         int axesCount;
         const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-        //std::cout << present << "\tAxes available:" << axesCount<< "\n";
+       // std::cout << present << "\tAxes available:" << axesCount<< "\n";
         if(present == 1 && axesCount != 6) {
             present = 0;
         }
         glm::vec3 oldPos = camPos;
-        if (glfwGetKey(window, GLFW_KEY_LEFT) or (present== 1 and axes[2] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_LEFT) || (present== 1 && axes[2] <= -0.5)) {
             YPR.x += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) or (present== 1 and axes[2] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) || (present== 1 && axes[2] >= 0.5)) {
             YPR.x -= dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_UP) or (present== 1 and axes[5] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_UP) || (present== 1 && axes[5] <= -0.5)) {
             YPR.y += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_DOWN) or (present== 1 and axes[5] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_DOWN) || (present== 1 && axes[5] >= 0.5)) {
             YPR.y -= dt * omega;
         }
         if (glfwGetKey(window, GLFW_KEY_Q)) {
@@ -434,19 +436,19 @@ protected:
         if (glfwGetKey(window, GLFW_KEY_E)) {
             YPR.z += dt * omega;
         }
-        if (glfwGetKey(window, GLFW_KEY_A)  or (present== 1 and axes[0] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_A)  || (present== 1 && axes[0] <= -0.5)) {
             camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1, 0, 0, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_D) or (present== 1 and axes[0] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_D) || (present== 1 && axes[0] >= 0.5)) {
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(1, 0, 0, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_W)  or (present== 1 and axes[1] <= -0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_W)  || (present== 1 && axes[1] <= -0.5)) {
             camPos -= mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
-        if (glfwGetKey(window, GLFW_KEY_S)  or (present== 1 and axes[1] >= 0.5)) {
+        if (glfwGetKey(window, GLFW_KEY_S)  || (present== 1 && axes[1] >= 0.5)) {
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
@@ -469,9 +471,36 @@ protected:
 
         gubo.lightPos1 = glm::vec3(4.0f, 6.15f, -3.247f); //light between the statues
         gubo.lightPos2 = glm::vec3(11.57f, 6.515f, 7.192f); //light for the paintings
+        gubo.spotPositions[0] = glm::vec3(1.3f, 5.0f, -7.3f); //Discobolus
+        gubo.spotPositions[1] = glm::vec3(6.3f, 5.0f, -7.3f); //venus
+        gubo.spotPositions[2] = glm::vec3(6.5f, 5.0f, -1.3f); //david
+        gubo.spotPositions[3] = glm::vec3(1.5f, 5.0f, -2.6f); //hercules
+
+        /*when positions will be added
+        float theta = atan(AssetVector[2].pos.z - gubo.spotPositions[0].z , AssetVector[2].pos.x - gubo.spotPositionss[0].x);
+         gubo.spotDir[0] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = atan(AssetVector[1].pos.z - gubo.spotPositions[1].z , AssetVector[1].pos.x - gubo.spotPositions[1].x);
+         gubo.spotDir[1] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = atan(AssetVector[4].pos.z - gubo.spotPositions[2].z , AssetVector[4].pos.x - gubo.spotPositions[2].x);
+         gubo.spotDir[2] = glm::vec3(cos(theta), sin(theta), 0.0f);
+         theta = atan(AssetVector[3].pos.z - gubo.spotPositions[3].z , AssetVector[3].pos.x - gubo.spotPositions[3].x);
+         gubo.spotDir[3] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        */
+
+        //set correct direction as angle atan(y,x) where y and x are differences between y and x coordinate of
+        //statues and spotlights
+        float theta = glm::atan(7.3f - gubo.spotPositions[0].z, 1.3f - gubo.spotPositions[0].x);
+        gubo.spotDir[0] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = glm::atan(7.5f - gubo.spotPositions[1].z, 6.2f - gubo.spotPositions[1].x);
+        gubo.spotDir[1] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = glm::atan(3.0f - gubo.spotPositions[2].z, 0.5f - gubo.spotPositions[2].x);
+        gubo.spotDir[2] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = glm::atan(1.3f - gubo.spotPositions[3].z, 7.6f - gubo.spotPositions[3].x);
+        gubo.spotDir[3] = glm::vec3(cos(theta), sin(theta), 0.0f);
+
         gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
-        gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 0.0f);
+        gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 1.0f);
 
         vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
             sizeof(gubo), 0, &data);
