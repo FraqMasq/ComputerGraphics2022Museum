@@ -43,7 +43,7 @@ const std::vector<Asset> AssetVector = {
         {"models/paints/VerticalPicture.obj", "textures/paints/Munch_Scream.jpg", {13.97, 3.558, -1.757}, 1.0},
         {"models/paints/VerticalPicture.obj", "textures/paints/VanGogh_self.jpg", {13.97, 3.558, 2.558}, 1.0},
 
-        {"models/misc/PopUp.obj", "textures/misc/PopUpTexture.png", {0.0, 0.0, 0.0}, 0.2}
+        {"models/misc/PopUp.obj", "textures/misc/PopUpVenus.png", {0.0, 0.0, 0.0}, 0.2}
 
 };
 
