@@ -458,7 +458,19 @@ protected:
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
+        // @todo controllo se il fatto che l'input è rilevato più volte può dare problemi
+        if (glfwGetKey(window, GLFW_KEY_K) ){
+            int notFound = 1;
+            for(int i = 1; i<numAssets && notFound; i++){
+                float dist = glm::abs(camPos.x - AssetVector[i].pos.x) + glm::abs(camPos.z - AssetVector[i].pos.z);
+                if (dist <= 4 && i!=6) {
+                    std::cout << "The nearest object is " << AssetVector[i].ObjPath
+                              << "\n";
+                    notFound = 0;
+                }
 
+            }
+        }
 
         // @todo implement canStep to enable stopping the movement (A06.cpp)
         if (!canStep(camPos.x, camPos.z)) {
