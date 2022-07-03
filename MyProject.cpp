@@ -148,6 +148,8 @@ protected:
 
     std::vector<Component> componentsVector;
 
+    bool isPopupShown = false;
+
 public:
 
 
@@ -392,6 +394,7 @@ protected:
     // Very likely this will be where you will be writing the logic of your application.
     void updateUniformBuffer(uint32_t currentImage) {
         static auto startTime = std::chrono::high_resolution_clock::now();
+        static float lastTime = 0.0f;
         auto currentTime = std::chrono::high_resolution_clock::now();
         float time = std::chrono::duration<float, std::chrono::seconds::period>
             (currentTime - startTime).count();
@@ -414,7 +417,9 @@ protected:
         omega = 1; //[Rad/s]
         mu = 10; //[unit/s]
 
-        dt = computeDeltaTime();
+        dt = time - lastTime;
+        lastTime = time;
+        static float debounce = time;
 
         int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
         int axesCount;
@@ -459,17 +464,24 @@ protected:
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
         // @todo controllo se il fatto che l'input è rilevato più volte può dare problemi
-        if (glfwGetKey(window, GLFW_KEY_K) ){
-            int notFound = 1;
-            for(int i = 1; i<numAssets && notFound; i++){
-                float dist = glm::abs(camPos.x - AssetVector[i].pos.x) + glm::abs(camPos.z - AssetVector[i].pos.z);
-                if (dist <= 4 && i!=6) {
-                    std::cout << "The nearest object is " << AssetVector[i].ObjPath
-                              << "\n";
-                    notFound = 0;
-                }
+        if (glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
+            if(time - debounce > 0.33) {
+                int notFound = 1;
+                for (int i = 1; i < numAssets && notFound; i++) {
+                    float dist = glm::abs(camPos.x - AssetVector[i].pos.x) + glm::abs(camPos.z - AssetVector[i].pos.z);
+                    if (dist <= 4 && i != 6) {
+                        isPopupShown = true;
+                        std::cout << "The nearest object is " << AssetVector[i].TexturePath
+                                  << "\n";
+                        notFound = 0;
+                    }
 
+                }
             }
+        }
+        if (glfwGetKey(window, GLFW_KEY_L) && isPopupShown){
+            isPopupShown = false;
+            std::cout << "Closing Popup\n";
         }
 
         // @todo implement canStep to enable stopping the movement (A06.cpp)
