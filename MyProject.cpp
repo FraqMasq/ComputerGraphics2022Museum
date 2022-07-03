@@ -515,7 +515,7 @@ protected:
                     glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));
 
             if(isPopupShown && nearestObject > 0 && i == mapping[nearestObject]){
-                ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x, camPos.y , camPos.z -2))*
+                ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2*sin(YPR.x), camPos.y , camPos.z - 2*cos(YPR.x)))*
                             //glm::translate(idMatrix, AssetVector[i].pos) *
                             glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
                             glm::rotate(idMatrix, YPR.x, yAxis);
