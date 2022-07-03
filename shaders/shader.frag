@@ -5,8 +5,8 @@ layout(set=0, binding = 0) uniform GlobalUniformBufferObject {
 	mat4 proj;
     vec3 lightPos1;
     vec3 lightPos2;
-	mat4x3 spotPositions;
-    mat4x3 spotDirections;
+	mat2x3 spotPositions;
+    mat2x3 spotDirections;
     vec3 lightColor;
     vec3 ambColor;
     vec4 coneInOutDecayExp;
@@ -32,7 +32,7 @@ vec3 compute_Color(vec3 N, vec3 V, vec3 Cd, vec3 Cs, float gamma) {
 	// vec3 Cs : specular Color
 	// float gamma: specular power
 	
-	const int n_spot = 4;
+	const int n_spot = 2;
 	
 	//Point light dir
 	vec3 dir1 = normalize(gubo.lightPos1 - fragPos);
