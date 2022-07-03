@@ -6,8 +6,13 @@ layout(set=0, binding = 0) uniform GlobalUniformBufferObject {
     vec3 lightColor;
     vec3 ambColor;
     vec4 coneInOutDecayExp;
-	mat2x3 spotPositions;
-    mat2x3 spotDirections;
+	vec3 spotPosition1;
+    vec3 spotPosition2;
+    vec3 spotPosition3;
+    vec3 spotPosition4;
+    vec3 spotDirection1;
+    vec3 spotDirection2;
+    vec3 spotDirection3;
 	mat4 view;
 	mat4 proj;
 } gubo;
