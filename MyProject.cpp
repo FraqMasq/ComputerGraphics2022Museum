@@ -1,6 +1,9 @@
 // This has been adapted from the Vulkan tutorial
 
 #include "MyProject.hpp"
+#include <unordered_map>
+
+
 
 
 
@@ -45,66 +48,31 @@ const std::vector<Asset> AssetVector = {
         {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0.0,0.0, 0.0}, 1.0},
         {"models/paints/HorizontalPicture.obj", "textures/paints/theBathers_Cezanne.jpg", {9.393, 2.842, 1.641}, 1.0},
         {"models/paints/VerticalPicture.obj", "textures/paints/Munch_Scream.jpg", {13.97, 3.558, -1.757}, 1.0},
-        {"models/paints/VerticalPicture.obj", "textures/paints/VanGogh_self.jpg", {13.97, 3.558, 2.558}, 1.0}
+        {"models/paints/VerticalPicture.obj", "textures/paints/VanGogh_self.jpg", {13.97, 3.558, 2.558}, 1.0},
+
+        {"models/misc/PopUp.obj", "textures/misc/PopUpTexture.png", {0.0, 0.0, 0.0}, 0.2}
 
 };
 
-const int numAssets = 10;
+const int numAssets = 11;
 
 //used to index AssetVector and ComponentVector
-enum ASSETS {STRUCTURE, VENUS, DISCOBOLUS, PEDESTAL, HERCULES, DAVID, FRAMES, BATHERS, MUNCH, VANGOGH};
+enum ASSETS {STRUCTURE, VENUS, DISCOBOLUS, PEDESTAL, HERCULES, DAVID, FRAMES, BATHERS, MUNCH, VANGOGH, POPUPVENUS};
 
-
-//MODEL
-//@todo usare AssetVector, indicizzato tramite enum ASSETS
-//const std::string MODEL_PATH = "models/viking_room.obj";
-//const std::string MODEL_PATH = "models/statues/davidStatue.obj";
-//const std::string DISCO_MODEL_PATH = "models/misc/doors.obj";
-
-
-//const std::string STRUCTURE_MODEL_PATH = "models/misc/WallsAndFloor2.obj"; //"models/misc/WallsAndFloor2.obj";
-//const std::string VENUS_MODEL_PATH = "models/statues/venus.obj";
-//const std::string DISCO_MODEL_PATH = "models/statues/discobolus.obj";
-
-//const std::string VENUS_MODEL_PATH = "models/paints/Frames.obj";
-//const std::string DISCO_MODEL_PATH = "models/paints/Munch.obj";
-
-//const std::string DISCO_MODEL_PATH = "models/paints/Bathers.obj";
-
-
-
-//Già posizionati:
-//const std::string VENUS_MODEL_PATH = "models/statues/pedestal.obj";
-//const std::string DISCO_MODEL_PATH = "models/statues/hercules.obj";
-
-//TEXTURE
-//const std::string TEXTURE_PATH = "textures/viking_room.png";
-//const std::string TEXTURE_PATH = "textures/statues/davidTexture.jpg";
-//const std::string TEXTURE_PATH = "textures/statues/hercules.jpg";
-//const std::string DISCO_TEXTURE_PATH = "textures/misc/door.png";
-
-const std::string STRUCTURE_TEXTURE_PATH = "textures/misc/floor_wall.png";
-const std::string VENUS_TEXTURE_PATH = "textures/statues/statue_venus.jpg";
-const std::string DISCO_TEXTURE_PATH = "textures/statues/discobolusTexture.png";
 const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
 
-//const std::string VENUS_TEXTURE_PATH = "textures/paints/T_picture_frame_BaseColor.tga";
-//const std::string DISCO_TEXTURE_PATH = "textures/paints/Munch_Scream.jpg";
-//const std::string DISCO_TEXTURE_PATH = "textures/paints/theBathers_Cezanne.jpg";
+std::unordered_map<int, int> mapping = {
+        {VENUS, POPUPVENUS},
+        {DISCOBOLUS, POPUPVENUS},
+        {PEDESTAL, POPUPVENUS},
+        {HERCULES, POPUPVENUS},
+        {DAVID, POPUPVENUS},
+        {MUNCH, POPUPVENUS},
+        {VANGOGH, POPUPVENUS},
+        {BATHERS, POPUPVENUS}
 
-//Già posizionati:
-//const std::string VENUS_TEXTURE_PATH = "textures/statues/pedestal.jpg";
-//const std::string DISCO_TEXTURE_PATH = "textures/statues/hercules.jpg";
+};
 
-// The uniform buffer object used in this example
-//IT may be splitted in {view, proj}(set0, binding0) and {model}(set1, binding0)
-// among with {texture} (set1, binding0)
-// and add a DSLinit for set0
-//need to bind ds_global with VKBindDescriptorSet and change the others params
-//also add in MapMemory
-//at the end change in shaders the set position
-// vert: (glb is set0bind0, obj is set1bind0)
-// frag: text is set1bind1
 struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 view;
 	alignas(16) glm::mat4 proj;
@@ -406,6 +374,11 @@ protected:
 
         float omega, mu, dt;
 
+        static int nearestObject;
+        if(!isPopupShown){
+            nearestObject = -1;
+        }
+
         static glm::vec3 YPR = glm::vec3(glm::radians(0.0f), 0.0f, glm::radians(0.0f));
 
         static glm::vec3 ux = glm::vec3(glm::rotate(idMatrix, YPR.x, yAxis) *
@@ -473,7 +446,9 @@ protected:
                         isPopupShown = true;
                         std::cout << "The nearest object is " << AssetVector[i].TexturePath
                                   << "\n";
+                        std::cout << "Mapped:\t" << i << ", " << mapping[i] << '\n';
                         notFound = 0;
+                        nearestObject = i;
                     }
 
                 }
@@ -481,6 +456,7 @@ protected:
         }
         if (glfwGetKey(window, GLFW_KEY_L) && isPopupShown){
             isPopupShown = false;
+            nearestObject = -1;
             std::cout << "Closing Popup\n";
         }
 
@@ -520,7 +496,16 @@ protected:
         vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
 
         for (int i = 0; i < numAssets; i++) {
-            ubo.model = glm::translate(idMatrix, AssetVector[i].pos);
+            ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
+                    glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));
+
+            if(isPopupShown && nearestObject > 0 && i == mapping[nearestObject]){
+                ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x, camPos.y , camPos.z -2))*
+                            //glm::translate(idMatrix, AssetVector[i].pos) *
+                            glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
+                            glm::rotate(idMatrix, YPR.x, yAxis);
+
+            }
             /*
              // @todo ruota intorno origine, deve ruotare l'oggetto
               if(i == HERCULES){
