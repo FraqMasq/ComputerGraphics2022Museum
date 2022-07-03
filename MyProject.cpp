@@ -43,26 +43,38 @@ const std::vector<Asset> AssetVector = {
         {"models/paints/VerticalPicture.obj", "textures/paints/Munch_Scream.jpg", {13.97, 3.558, -1.757}, 1.0},
         {"models/paints/VerticalPicture.obj", "textures/paints/VanGogh_self.jpg", {13.97, 3.558, 2.558}, 1.0},
 
-        {"models/misc/PopUp.obj", "textures/misc/PopUpVenus.png", {-5.0, -5.0, -5.0}, 0.2}
+        {"models/misc/PopUp.obj", "textures/misc/PopUpVenus.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/PopUpDiscobolus.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/PopUpHercules.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/PopUpDavid.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/PopUpBathers.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/PopUpMunch.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2}
 
 };
 
-const int numAssets = 11;
+const int numAssets = 17; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
 
 //used to index AssetVector and ComponentVector
-enum ASSETS {STRUCTURE, VENUS, DISCOBOLUS, PEDESTAL, HERCULES, DAVID, FRAMES, BATHERS, MUNCH, VANGOGH, POPUPVENUS};
+enum ASSETS {STRUCTURE,
+        VENUS, DISCOBOLUS, PEDESTAL, HERCULES, DAVID,
+        FRAMES,
+        BATHERS, MUNCH, VANGOGH,
+        POPUPVENUS, POPUPDISCOBOLUS, POPUPHERCULES, POPUPDAVID,
+        POPUPBATHERS, POPUPMUNCH, POPUPVANGOGH
+};
 
 const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
 
 std::unordered_map<int, int> mapping = {
         {VENUS, POPUPVENUS},
-        {DISCOBOLUS, POPUPVENUS},
-        {PEDESTAL, POPUPVENUS},
-        {HERCULES, POPUPVENUS},
-        {DAVID, POPUPVENUS},
-        {MUNCH, POPUPVENUS},
-        {VANGOGH, POPUPVENUS},
-        {BATHERS, POPUPVENUS}
+        {DISCOBOLUS, POPUPDISCOBOLUS},
+        {PEDESTAL, POPUPHERCULES},
+        {HERCULES, POPUPHERCULES},
+        {DAVID, POPUPDAVID},
+        {MUNCH, POPUPMUNCH},
+        {VANGOGH, POPUPVANGOGH},
+        {BATHERS, POPUPBATHERS}
 
 };
 
@@ -514,7 +526,8 @@ protected:
             ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
                     glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));
 
-            if(isPopupShown && nearestObject > 0 && i == mapping[nearestObject]){
+            //nearestObject != 0 (STRUCTURE) & mapping[.]=0 for each not defined asset
+            if(isPopupShown && nearestObject*mapping[nearestObject] > 0 && i == mapping[nearestObject]){
                 ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2*sin(YPR.x), camPos.y , camPos.z - 2*cos(YPR.x)))*
                             //glm::translate(idMatrix, AssetVector[i].pos) *
                             glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
