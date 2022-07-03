@@ -67,15 +67,15 @@ std::unordered_map<int, int> mapping = {
 };
 
 struct GlobalUniformBufferObject {
-	alignas(16) glm::mat4 view;
-	alignas(16) glm::mat4 proj;
     alignas(16) glm::vec3 lightPos1;
     alignas(16) glm::vec3 lightPos2;
-    alignas(16) glm::mat2x3 spotPositions;
-    alignas(16) glm::mat2x3 spotDirections;
     alignas(16) glm::vec3 lightColor;
     alignas(16) glm::vec3 ambColor;
     alignas(16) glm::vec4 coneInOutDecayExp;
+    alignas(16) glm::mat2x3 spotPositions;
+    alignas(16) glm::mat2x3 spotDirections;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
 };
 
 struct UniformBufferObject {
