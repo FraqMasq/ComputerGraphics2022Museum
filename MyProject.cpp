@@ -33,13 +33,6 @@ const std::vector<Asset> AssetVector = {
         {"models/statues/pedestal.obj", "textures/statues/pedestal.jpg", {-0.5,0.0, -3.001}, 1.0},
         {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {-0.5,1.653, -2.989}, 1.0},
         {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {7.578,0.0, -1.291}, 1.0},
-
-        /*
-        float theta = glm::atan(7.3f , 1.3f ); -> -7.2, 1.4
-        theta = glm::atan(7.5f , 6.2f ); -> -7.3, 6.2
-        theta = glm::atan(3.0f , 0.5f ); -> -3, -0.5
-        theta = glm::atan(1.3f , 7.6f ); -> -1.3 7.6
-        */
         
 
         {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0.0,0.0, 0.0}, 1.0},
@@ -110,6 +103,8 @@ struct GlobalUniformBufferObject {
 	alignas(16) glm::mat4 proj;
     alignas(16) glm::vec3 lightPos1;
     alignas(16) glm::vec3 lightPos2;
+    alignas(16) glm::mat4x3 spotPositions;
+    alignas(16) glm::mat4x3 spotDirections;
     alignas(16) glm::vec3 lightColor;
     alignas(16) glm::vec3 ambColor;
     alignas(16) glm::vec4 coneInOutDecayExp;
@@ -491,10 +486,26 @@ protected:
         gubo.lightPos2 = glm::vec3(11.57f, 6.515f, 7.192f); //light for the paintings
 
 
+        gubo.spotPositions[0] = glm::vec3(1.3f, 4.0f, -5.3f); //Discobolus
+        gubo.spotPositions[1] = glm::vec3(6.3f, 4.0f, -5.2f); //venus
+        gubo.spotPositions[2] = glm::vec3(4.5f, 4.0f, -1.3f); //david
+        gubo.spotPositions[3] = glm::vec3(2.0f, 4.0f, -3.0f); //hercules
+
 
         //set correct direction as angle atan(y,x) where y and x are differences between y and x coordinate of 
         //statues and spotlights
         //float theta = glm::atan(AssetVector[2].pos.z - gubo.spotPositions[0].z, AssetVector[2].pos.x - gubo.spotPositions[0].x);
+        float theta = glm::radians(90.0f);
+        gubo.spotDirections[0] = glm::vec3(cos(theta), sin(theta), 0.7f);
+        //theta = glm::atan(glm::abs(AssetVector[1].pos.z - gubo.spotPositions[1].z) , glm::abs(AssetVector[1].pos.x - gubo.spotPositions[1].x));
+        gubo.spotDirections[1] = glm::vec3(cos(theta), sin(theta), 0.7f);
+        //theta = glm::atan(glm::abs(AssetVector[5].pos.z - gubo.spotPositions[2].z) , glm::abs(AssetVector[5].pos.x - gubo.spotPositions[2].x));
+        theta = glm::radians(160.0f);
+        gubo.spotDirections[2] = glm::vec3(cos(theta), sin(theta), 0.0f);
+        //theta = glm::atan(glm::abs(AssetVector[4].pos.z - gubo.spotPositions[3].z) , glm::abs(AssetVector[4].pos.x - gubo.spotPositions[3].x));
+        theta = glm::radians(20.0f);
+        gubo.spotDirections[3] = glm::vec3(cos(theta), sin(theta), 0.0f);
+
 
         
 
