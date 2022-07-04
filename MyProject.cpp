@@ -43,13 +43,13 @@ const std::vector<Asset> AssetVector = {
         {"models/paints/VerticalPicture.obj", "textures/paints/Munch_Scream.jpg", {13.97, 3.558, -1.757}, 1.0},
         {"models/paints/VerticalPicture.obj", "textures/paints/VanGogh_self.jpg", {13.97, 3.558, 2.558}, 1.0},
 
-        {"models/misc/PopUp.obj", "textures/misc/PopUpVenus.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/PopUpDiscobolus.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/PopUpHercules.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/PopUpDavid.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/PopUpBathers.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/PopUpMunch.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2}
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVenus.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpDiscobolus.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpHercules.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpDavid.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpBathers.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpMunch.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2}
 
 };
 
