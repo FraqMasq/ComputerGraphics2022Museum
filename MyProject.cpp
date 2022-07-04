@@ -454,7 +454,7 @@ protected:
                 int notFound = 1;
                 for (int i = 1; i < numAssets && notFound; i++) {
                     float dist = glm::abs(camPos.x - AssetVector[i].pos.x) + glm::abs(camPos.z - AssetVector[i].pos.z);
-                    if (dist <= 4 && i != 6) {
+                    if (i != FRAMES && dist <= 4 ) {
                         isPopupShown = true;
                         std::cout << "The nearest object is " << AssetVector[i].TexturePath
                                   << "\n";
