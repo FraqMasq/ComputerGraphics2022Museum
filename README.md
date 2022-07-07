@@ -12,3 +12,5 @@ Assets:
 - david: https://free3d.com/3d-model/statue-v1--372946.html
 - venus: https://free3d.com/3d-model/statue-v1--541832.html
 - structure: https://www.turbosquid.com/3d-models/3d-model-apartment-floor-1427811
+- Planet textures: https://www.solarsystemscope.com/textures/
+- Saturn model: https://free3d.com/3d-model/saturn-v1--741827.html
