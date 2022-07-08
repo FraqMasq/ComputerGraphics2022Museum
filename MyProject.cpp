@@ -56,13 +56,20 @@ const std::vector<Asset> AssetVector = {
 const std::vector<Asset> AssetVector2 = {
         {"models/misc/StructureScene2.obj", "textures/misc/StructureScene2Texture.jpeg", {0.0,0.0, 0.0}, 1.0},
 
-        {"models/planets/PlanetsSphere.obj", "textures/planets/saturnWithRings.jpg", {0.0,0.0, 0.0}, 1.0},
-        {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,0.0, 0.0}, 1.0}
+        {"models/planets/PlanetsSphere.obj", "textures/planets/mercury.jpg", {0.0,2.0, -8.0}, 0.1},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg", {0.0,2.0, -7.0}, 0.25},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/earth.jpg", {0.0,2.0, -6.0}, 0.25},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/mars.jpg", {0.0,2.0, -5.0}, 0.15},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/jupiter.jpg", {0.0,2.0, -2.0}, 1.1},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 2.0}, 1.0},
+        {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 2.0}, 1.0},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg", {0.0,2.0, 6.0}, 0.75},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg", {0.0,2.0, 10.0}, 0.75}
        
 
 };
 const int numAssets = 17; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
-const int numAssets2 = 3; // 
+const int numAssets2 = 10; // 
 
 //used to index AssetVector and ComponentVector
 enum ASSETS {STRUCTURE,
@@ -204,7 +211,7 @@ protected:
             // be used in this pipeline. The first element will be set 0, and so on..
             P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj });
 
-            P2.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj2 });
+            P2.init(this, "shaders/planet_vert.spv", "shaders/planet_frag.spv", { &DSLGlobal, &DSLObj2 });
 
 
             componentsVector.resize(AssetVector.size());
@@ -278,7 +285,7 @@ protected:
         
             P1.reinit(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj }); //maybe reinit is equal to init at the end, check if needs another moethod
             
-            P2.reinit(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj2 }); //maybe reinit is equal to init at the end, check if needs another moethod
+            P2.reinit(this, "shaders/planet_vert.spv", "shaders/planet_frag.spv", { &DSLGlobal, &DSLObj2 }); //maybe reinit is equal to init at the end, check if needs another moethod
         
     }
 
@@ -591,8 +598,8 @@ protected:
             }
         }
 
-        // @todo implement canStep to enable stopping the movement (A06.cpp)
-        if (!canStep(camPos.x, camPos.z)) {
+        // provvisorio, eventualmente aggiungere un'altra mappa
+        if (curText == 0 && !canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
         }
 
