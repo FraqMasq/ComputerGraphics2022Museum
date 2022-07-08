@@ -53,7 +53,16 @@ const std::vector<Asset> AssetVector = {
 
 };
 
+const std::vector<Asset> AssetVector2 = {
+        {"models/misc/StructureScene2.obj", "textures/misc/StructureScene2Texture.jpeg", {0.0,0.0, 0.0}, 1.0},
+
+        {"models/planets/PlanetsSphere.obj", "textures/planets/saturnWithRings.jpg", {0.0,0.0, 0.0}, 1.0},
+        {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,0.0, 0.0}, 1.0}
+       
+
+};
 const int numAssets = 17; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
+const int numAssets2 = 3; // 
 
 //used to index AssetVector and ComponentVector
 enum ASSETS {STRUCTURE,
@@ -117,18 +126,24 @@ protected:
     // Descriptor Layouts [what will be passed to the shaders]
     DescriptorSetLayout DSLGlobal;
     DescriptorSetLayout DSLObj;
+   // DescriptorSetLayout DSLGlobal2;
+    DescriptorSetLayout DSLObj2;
 
     // Pipelines [Shader couples]
     Pipeline P1;
+    Pipeline P2;
 
     DescriptorSet DS_GLOBAL;
+    DescriptorSet DS_GLOBAL2;
 
     Map museumMap;
 
-
     std::vector<Component> componentsVector;
+    std::vector<Component> componentsVector2;
 
     bool isPopupShown = false;
+    int curText = 0;
+    int num_scenes = 2;
 
 public:
 
@@ -147,96 +162,164 @@ protected:
         initialBackgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 
         // Descriptor pool sizes -> modify if add other models
-        uniformBlocksInPool = numAssets + 1;
-        texturesInPool = numAssets;
-        setsInPool = numAssets + 1;
+        //per il cambio di scena?
+        uniformBlocksInPool = numAssets + numAssets2 + 2;
+        texturesInPool = numAssets + numAssets2;
+        setsInPool = numAssets + numAssets2 + 2;
     }
 
     // Here you load and setup all your Vulkan objects
     void localInit() {
         // Descriptor Layouts [what will be passed to the shaders]
-        DSLGlobal.init(this, {
-                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
-            });
-
-        DSLObj.init(this, {
-            // this array contains the binding:
-            // first  element : the binding number
-            // second element : the time of element (buffer or texture)
-            // third  element : the pipeline stage where it will be used
-            {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
-            {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
-            });
-
-        // Pipelines [Shader couples]
-        // The last array, is a vector of pointer to the layouts of the sets that will
-        // be used in this pipeline. The first element will be set 0, and so on..
-        P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj });
-
-        componentsVector.resize(AssetVector.size());
-        for (int j = 0; j < componentsVector.size(); j++) {
-            componentsVector[j].M.init(this, AssetVector[j].ObjPath);
-            componentsVector[j].T.init(this, AssetVector[j].TexturePath);
-            componentsVector[j].DS.init(this, &DSLObj, {
-                /*
-                // the second parameter, is a pointer to the Uniform Set Layout of this set
-                // the last parameter is an array, with one element per binding of the set.
-                // first  elmenet : the binding number
-                // second element : UNIFORM or TEXTURE (an enum) depending on the type
-                // third  element : only for UNIFORMs, the size of the corresponding C++ object
-                // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
-                {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
-                {1, TEXTURE, 0, &componentsVector[j].T}
+        
+            DSLGlobal.init(this, {
+                    {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
                 });
-        }
-        // Models, textures and Descriptors (values assigned to the uniforms)
 
-        /*
-        // the second parameter, is a pointer to the Uniform Set Layout of this set
-        // the last parameter is an array, with one element per binding of the set.
-        // first  elmenet : the binding number
-        // second element : UNIFORM or TEXTURE (an enum) depending on the type
-        // third  element : only for UNIFORMs, the size of the corresponding C++ object
-        // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
+            //DSLGlobal2.init(this, {
+               // {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
+               // });
 
 
+            DSLObj.init(this, {
+                // this array contains the binding:
+                // first  element : the binding number
+                // second element : the time of element (buffer or texture)
+                // third  element : the pipeline stage where it will be used
+                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
+                {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+                });
 
-        DS_GLOBAL.init(this, &DSLGlobal, {
-                {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
-            });
+            DSLObj2.init(this, {
+                // this array contains the binding:
+                // first  element : the binding number
+                // second element : the time of element (buffer or texture)
+                // third  element : the pipeline stage where it will be used
+                {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
+                {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+                });
 
-        museumMap.loadMap();
+            // Pipelines [Shader couples]
+            // The last array, is a vector of pointer to the layouts of the sets that will
+            // be used in this pipeline. The first element will be set 0, and so on..
+            P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj });
 
+            P2.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj2 });
+
+
+            componentsVector.resize(AssetVector.size());
+            for (int j = 0; j < componentsVector.size(); j++) {
+                componentsVector[j].M.init(this, AssetVector[j].ObjPath);
+                componentsVector[j].T.init(this, AssetVector[j].TexturePath);
+                componentsVector[j].DS.init(this, &DSLObj, {
+                    /*
+                    // the second parameter, is a pointer to the Uniform Set Layout of this set
+                    // the last parameter is an array, with one element per binding of the set.
+                    // first  elmenet : the binding number
+                    // second element : UNIFORM or TEXTURE (an enum) depending on the type
+                    // third  element : only for UNIFORMs, the size of the corresponding C++ object
+                    // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
+                    {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
+                    {1, TEXTURE, 0, &componentsVector[j].T}
+                    });
+
+            }
+
+            std::cout << "size:" << AssetVector2.size();
+            componentsVector2.resize(AssetVector2.size());
+            for (int j = 0; j < componentsVector2.size(); j++) {
+                componentsVector2[j].M.init(this, AssetVector2[j].ObjPath);
+                componentsVector2[j].T.init(this, AssetVector2[j].TexturePath);
+                componentsVector2[j].DS.init(this, &DSLObj2, {
+                    /*
+                    // the second parameter, is a pointer to the Uniform Set Layout of this set
+                    // the last parameter is an array, with one element per binding of the set.
+                    // first  elmenet : the binding number
+                    // second element : UNIFORM or TEXTURE (an enum) depending on the type
+                    // third  element : only for UNIFORMs, the size of the corresponding C++ object
+                    // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
+                {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
+                {1, TEXTURE, 0, &componentsVector2[j].T}
+                    });
+
+            }
+
+
+            // Models, textures and Descriptors (values assigned to the uniforms)
+
+            /*
+            // the second parameter, is a pointer to the Uniform Set Layout of this set
+            // the last parameter is an array, with one element per binding of the set.
+            // first  elmenet : the binding number
+            // second element : UNIFORM or TEXTURE (an enum) depending on the type
+            // third  element : only for UNIFORMs, the size of the corresponding C++ object
+            // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
+
+
+
+            DS_GLOBAL.init(this, &DSLGlobal, {
+                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
+                });
+
+            DS_GLOBAL2.init(this, &DSLGlobal, {
+                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
+                });
+
+           
+
+            museumMap.loadMap();
+        
     }
 
     void localReInit() {
         // Pipelines [Shader couples]
         // The last array, is a vector of pointer to the layouts of the sets that will
         // be used in this pipeline. The first element will be set 0, and so on..
-        P1.reinit(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj }); //maybe reinit is equal to init at the end, check if needs another moethod
-
+        
+            P1.reinit(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj }); //maybe reinit is equal to init at the end, check if needs another moethod
+            
+            P2.reinit(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj2 }); //maybe reinit is equal to init at the end, check if needs another moethod
+        
     }
 
     // Here you destroy all the objects you created!		
     void localCleanup() {
-
+        
         for (int j = 0; j < componentsVector.size(); j++) {
             componentsVector[j].M.cleanup();
             componentsVector[j].T.cleanup();
             componentsVector[j].DS.cleanup();
         }
 
-        DS_GLOBAL.cleanup();
+        for (int j = 0; j < componentsVector2.size(); j++) {
+            componentsVector2[j].M.cleanup();
+            componentsVector2[j].T.cleanup();
+            componentsVector2[j].DS.cleanup();
+        }
 
-		//P1.cleanup();
-		DSLGlobal.cleanup();
+        DS_GLOBAL.cleanup();
+        DS_GLOBAL2.cleanup();
+
+        //P1.cleanup();
+        DSLGlobal.cleanup();
         DSLObj.cleanup();
+        DSLObj2.cleanup();
+
+        //DS_GLOBAL2.cleanup();
+
+        //DSLGlobal2.cleanup();
+        
+        
     }
 
     //@todo Controllo se P1 != VK_NULL_HANDLE -> cleanup
     void localPipeCleanup() {
+        
+            P1.cleanup();
 
-        P1.cleanup();
+            P2.cleanup();
+        
+        
     }
 
     static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
@@ -249,40 +332,67 @@ protected:
     // with their buffers and textures
     void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            P1.graphicsPipeline);
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, curText == 0 ? 
+            P1.graphicsPipeline : P2.graphicsPipeline);
 
+       
         vkCmdBindDescriptorSets(commandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            P1.pipelineLayout, 0, 1, &DS_GLOBAL.descriptorSets[currentImage],
+            curText == 0 ? P1.pipelineLayout : P2.pipelineLayout, 0, 1, curText == 0 ? &DS_GLOBAL.descriptorSets[currentImage] : &DS_GLOBAL2.descriptorSets[currentImage],
             0, nullptr);
-
 
         VkDeviceSize offsets[] = { 0 };
 
-        VkBuffer vertexBuffers[numAssets][1];
-        for (int i = 0; i < numAssets; i++) {
-            vertexBuffers[i][0] = componentsVector[i].M.vertexBuffer;
-            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[i], offsets);
-            // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
-            vkCmdBindIndexBuffer(commandBuffer, componentsVector[i].M.indexBuffer, 0,
-                VK_INDEX_TYPE_UINT32);
+        if (curText == 0) {
+            VkBuffer vertexBuffers[numAssets][1];
+            for (int i = 0; i < numAssets; i++) {
+                vertexBuffers[i][0] = componentsVector[i].M.vertexBuffer;
+                vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[i], offsets);
+                // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
+                vkCmdBindIndexBuffer(commandBuffer, componentsVector[i].M.indexBuffer, 0,
+                    VK_INDEX_TYPE_UINT32);
 
-            // property .pipelineLayout of a pipeline contains its layout.
-            // property .descriptorSets of a descriptor set contains its elements.
-            vkCmdBindDescriptorSets(commandBuffer,
-                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                P1.pipelineLayout, 1, 1, &componentsVector[i].DS.descriptorSets[currentImage],
-                0, nullptr);
+                // property .pipelineLayout of a pipeline contains its layout.
+                // property .descriptorSets of a descriptor set contains its elements.
+                vkCmdBindDescriptorSets(commandBuffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    P1.pipelineLayout, 1, 1, &componentsVector[i].DS.descriptorSets[currentImage],
+                    0, nullptr);
 
 
 
-            // property .indices.size() of models, contains the number of triangles * 3 of the mesh.
-            vkCmdDrawIndexed(commandBuffer,
-                static_cast<uint32_t>(componentsVector[i].M.indices.size()), 1, 0, 0, 0);
+                // property .indices.size() of models, contains the number of triangles * 3 of the mesh.
+                vkCmdDrawIndexed(commandBuffer,
+                    static_cast<uint32_t>(componentsVector[i].M.indices.size()), 1, 0, 0, 0);
 
+
+            }
         }
+        else{
+            VkBuffer vertexBuffers2[numAssets2][1];
+            for (int i = 0; i < numAssets2; i++) {
+                vertexBuffers2[i][0] = componentsVector2[i].M.vertexBuffer;
+                vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers2[i], offsets);
+                // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
+                vkCmdBindIndexBuffer(commandBuffer, componentsVector2[i].M.indexBuffer, 0,
+                    VK_INDEX_TYPE_UINT32);
 
+                // property .pipelineLayout of a pipeline contains its layout.
+                // property .descriptorSets of a descriptor set contains its elements.
+                vkCmdBindDescriptorSets(commandBuffer,
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    P2.pipelineLayout, 1, 1, &componentsVector2[i].DS.descriptorSets[currentImage],
+                    0, nullptr);
+
+
+
+                // property .indices.size() of models, contains the number of triangles * 3 of the mesh.
+                vkCmdDrawIndexed(commandBuffer,
+                    static_cast<uint32_t>(componentsVector2[i].M.indices.size()), 1, 0, 0, 0);
+               
+
+            }
+        }
         /* = {componentsVector[STRUCTURE].M.vertexBuffer,
                                     componentsVector[VENUS].M.vertexBuffer,
                                     componentsVector[DISCOBOLUS].M.vertexBuffer};
@@ -472,6 +582,15 @@ protected:
             std::cout << "Closing Popup\n";
         }
 
+        if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+            if (time - debounce > 0.33) {
+                curText = (curText + 1) % num_scenes;
+                debounce = time;
+                framebufferResized = true;
+                std::cout << curText << "\n";
+            }
+        }
+
         // @todo implement canStep to enable stopping the movement (A06.cpp)
         if (!canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
@@ -491,8 +610,8 @@ protected:
         gubo.lightPos2 = glm::vec3(11.57f, 6.515f, 7.192f); //light for the paintings
 
         
-        gubo.spotPosition1 = glm::vec3(1.3f, 4.0f, -5.3f); //Discobolus
-        gubo.spotPosition2= glm::vec3(6.3f, 4.0f, -5.2f); //venus
+        gubo.spotPosition1 = glm::vec3(1.3f, 6.0f, -4.3f); //Discobolus
+        gubo.spotPosition2= glm::vec3(6.3f, 6.0f, -4.2f); //venus
         gubo.spotPosition3 = glm::vec3(4.5f, 4.0f, -1.3f); //david
         gubo.spotPosition4 = glm::vec3(2.0f, 4.0f, -3.0f); //hercules
         
@@ -508,7 +627,7 @@ protected:
         //statues and spotlights
         //float theta = glm::atan(AssetVector[2].pos.z - gubo.spotPositions[0].z, AssetVector[2].pos.x - gubo.spotPositions[0].x);
         float theta = glm::radians(90.0f);
-        gubo.spotDirection1 = glm::vec3(cos(theta), sin(theta), 0.7f);
+        gubo.spotDirection1 = glm::normalize(glm::vec3(cos(theta), sin(theta), 0.7f));
         //theta = glm::atan(glm::abs(AssetVector[1].pos.z - gubo.spotPositions[1].z) , glm::abs(AssetVector[1].pos.x - gubo.spotPositions[1].x));
         //theta = glm::atan(glm::abs(AssetVector[5].pos.z - gubo.spotPositions[2].z) , glm::abs(AssetVector[5].pos.x - gubo.spotPositions[2].x));
         theta = glm::radians(160.0f);
@@ -528,34 +647,82 @@ protected:
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
         gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 2.0f);
 
-        vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
-            sizeof(gubo), 0, &data);
-        memcpy(data, &gubo, sizeof(gubo));
-        vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
+        if (curText == 0) {
+            vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
+                sizeof(gubo), 0, &data);
 
-        for (int i = 0; i < numAssets; i++) {
-            ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
+            memcpy(data, &gubo, sizeof(gubo));
+            vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
+
+            vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
+                sizeof(gubo), 0, &data);
+            memcpy(data, &gubo, sizeof(gubo));
+            vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
+        }
+        else{
+            vkMapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage], 0,
+                sizeof(gubo), 0, &data);
+
+            memcpy(data, &gubo, sizeof(gubo));
+            vkUnmapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage]);
+
+            vkMapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage], 0,
+                sizeof(gubo), 0, &data);
+            memcpy(data, &gubo, sizeof(gubo));
+            vkUnmapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage]);
+        }
+            
+        if (curText == 0) {
+            for (int i = 0; i < numAssets; i++) {
+                ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
                     glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));
 
-            //nearestObject != 0 (STRUCTURE) & mapping[.]=0 for each not defined asset
-            if(isPopupShown && nearestObject*mapping[nearestObject] > 0 && i == mapping[nearestObject]){
-                ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2*sin(YPR.x), camPos.y , camPos.z - 2*cos(YPR.x)))*
+                //nearestObject != 0 (STRUCTURE) & mapping[.]=0 for each not defined asset
+                if (isPopupShown && nearestObject * mapping[nearestObject] > 0 && i == mapping[nearestObject]) {
+                    ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2 * sin(YPR.x), camPos.y, camPos.z - 2 * cos(YPR.x))) *
+                        //glm::translate(idMatrix, AssetVector[i].pos) *
+                        glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
+                        glm::rotate(idMatrix, YPR.x, yAxis);
+
+                }
+                /*
+                 // @todo ruota intorno origine, deve ruotare l'oggetto
+                  if(i == HERCULES){
+                    ubo.model = ubo.model *
+                            glm::rotate(idMatrix, glm::radians(270.0f) * time,
+                            glm::vec3(0.0f, 1.0f, 0.0f));
+                }*/
+                vkMapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage], 0,
+                    sizeof(ubo), 0, &data);
+                memcpy(data, &ubo, sizeof(ubo));
+                vkUnmapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage]);
+            }
+        }
+        else{
+                for (int i = 0; i < numAssets2; i++) {
+                    ubo.model = glm::translate(idMatrix, AssetVector2[i].pos) *
+                        glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale));
+
+                    //nearestObject != 0 (STRUCTURE) & mapping[.]=0 for each not defined asset
+                    if (isPopupShown && nearestObject * mapping[nearestObject] > 0 && i == mapping[nearestObject]) {
+                        ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2 * sin(YPR.x), camPos.y, camPos.z - 2 * cos(YPR.x))) *
                             //glm::translate(idMatrix, AssetVector[i].pos) *
-                            glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
+                            glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale)) *
                             glm::rotate(idMatrix, YPR.x, yAxis);
 
-            }
-            /*
-             // @todo ruota intorno origine, deve ruotare l'oggetto
-              if(i == HERCULES){
-                ubo.model = ubo.model *
-                        glm::rotate(idMatrix, glm::radians(270.0f) * time,
-                        glm::vec3(0.0f, 1.0f, 0.0f));
-            }*/
-            vkMapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage], 0,
-                sizeof(ubo), 0, &data);
-            memcpy(data, &ubo, sizeof(ubo));
-            vkUnmapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage]);
+                    }
+                    /*
+                     // @todo ruota intorno origine, deve ruotare l'oggetto
+                      if(i == HERCULES){
+                        ubo.model = ubo.model *
+                                glm::rotate(idMatrix, glm::radians(270.0f) * time,
+                                glm::vec3(0.0f, 1.0f, 0.0f));
+                    }*/
+                    vkMapMemory(device, componentsVector2[i].DS.uniformBuffersMemory[0][currentImage], 0,
+                        sizeof(ubo), 0, &data);
+                    memcpy(data, &ubo, sizeof(ubo));
+                    vkUnmapMemory(device, componentsVector2[i].DS.uniformBuffersMemory[0][currentImage]);
+                }
         }
     }
     bool canStepPoint(float x, float y) {
