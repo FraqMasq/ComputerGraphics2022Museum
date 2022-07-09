@@ -56,15 +56,16 @@ const std::vector<Asset> AssetVector = {
 const std::vector<Asset> AssetVector2 = {
         {"models/misc/StructureScene2.obj", "textures/misc/StructureScene2Texture.jpeg", {0.0,0.0, 0.0}, 1.0},
 
-        {"models/planets/PlanetsSphere.obj", "textures/planets/mercury.jpg", {0.0,2.0, -8.0}, 0.1},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg", {0.0,2.0, -7.0}, 0.25},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/earth.jpg", {0.0,2.0, -6.0}, 0.25},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/mars.jpg", {0.0,2.0, -5.0}, 0.15},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/jupiter.jpg", {0.0,2.0, -2.0}, 1.1},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 2.0}, 1.0},
-        {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 2.0}, 1.0},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg", {0.0,2.0, 6.0}, 0.75},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg", {0.0,2.0, 10.0}, 0.75}
+        {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg", {0.0,2.0, 0.0}, 1.0},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/mercury.jpg", {0.0,2.0, 2.0}, 0.1},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg", {0.0,2.0, 3.0}, 0.25},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/earth.jpg", {0.0,2.0, 4.0}, 0.25},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/mars.jpg", {0.0,2.0, 5.0}, 0.15},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/jupiter.jpg", {0.0,2.0, 8.0}, 1.1},
+        //{"models/planets/PlanetsSphere.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 10.0}, 1.0},
+        {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 11.0}, 1.0},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg", {0.0,2.0, 14.0}, 0.5},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg", {0.0,2.0, 17.0}, 0.5}
        
 
 };
@@ -323,9 +324,7 @@ protected:
     void localPipeCleanup() {
         
             P1.cleanup();
-
             P2.cleanup();
-        
         
     }
 
@@ -502,6 +501,7 @@ protected:
         void* data;
 
         float omega, mu, dt;
+        std::vector<float> planet_v = {0.0, 0.0, 1.0, 0.7, 0.5, 0.4, 0.2, 0.05, 0.04, 0.04 };
 
         static int nearestObject;
         if(!isPopupShown){
@@ -707,8 +707,16 @@ protected:
         }
         else{
                 for (int i = 0; i < numAssets2; i++) {
-                    ubo.model = glm::translate(idMatrix, AssetVector2[i].pos) *
-                        glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale));
+                    if (i==0 || i == 1)
+                        ubo.model = glm::translate(idMatrix, AssetVector2[i].pos) *
+                            glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale));
+                    else
+                        ubo.model = glm::rotate(idMatrix, glm::radians(270.0f) * time * planet_v[i],
+                            yAxis) *
+                            glm::translate(idMatrix, AssetVector2[i].pos) *
+                            glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale)) *
+                            glm::rotate(idMatrix, glm::radians(270.0f) * time,
+                                yAxis);
 
                     //nearestObject != 0 (STRUCTURE) & mapping[.]=0 for each not defined asset
                     if (isPopupShown && nearestObject * mapping[nearestObject] > 0 && i == mapping[nearestObject]) {
