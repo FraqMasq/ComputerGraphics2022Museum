@@ -504,6 +504,9 @@ protected:
         std::vector<float> planet_v = {0.0, 0.0, 1.0, 0.7, 0.5, 0.4, 0.2, 0.05, 0.04, 0.04 };
 
         static int nearestObject;
+        int numCircles = 0;
+        int cw;
+
         if(!isPopupShown){
             nearestObject = -1;
         }
@@ -533,9 +536,13 @@ protected:
         glm::vec3 oldPos = camPos;
         if (glfwGetKey(window, GLFW_KEY_LEFT) || (present== 1 && axes[2] <= -0.5)) {
             YPR.x += dt * omega;
+            numCircles = glm::floor(abs(YPR.x) / 6);
+            std::cout << "x: " << YPR.x << "\n";
         }
         if (glfwGetKey(window, GLFW_KEY_RIGHT) || (present== 1 && axes[2] >= 0.5)) {
             YPR.x -= dt * omega;
+            numCircles = glm::floor(abs(YPR.x) / 6);
+            std::cout << "x: " << YPR.x << "\n";
         }
         if (glfwGetKey(window, GLFW_KEY_UP) || (present== 1 && axes[5] <= -0.5)) {
             YPR.y += dt * omega;
@@ -566,23 +573,50 @@ protected:
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
         
-        if (glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
+        if (curText == 0 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
             if(time - debounce > 0.33) {
                 int notFound = 1;
                 for (int i = 1; i < numAssets && notFound; i++) {
                     float dist = glm::abs(camPos.x - AssetVector[i].pos.x) + glm::abs(camPos.z - AssetVector[i].pos.z);
-                    if (i != FRAMES && dist <= 4 ) {
-                        isPopupShown = true;
-                        std::cout << "The nearest object is " << AssetVector[i].TexturePath
-                                  << "\n";
-                        std::cout << "Mapped:\t" << i << ", " << mapping[i] << '\n';
-                        notFound = 0;
-                        nearestObject = i;
+                    if (i != FRAMES && dist >1 && dist <= 5 ) {
+                        cw = glm::sign(YPR.x);
+                        float orientation = glm::abs(YPR.x);
+                        orientation = orientation - 6 * numCircles;
+                        if (checkOrientation(AssetVector[i].pos.x, AssetVector[i].pos.z, camPos.x, camPos.z,orientation,cw)) {
+                            isPopupShown = true;
+                            std::cout << "The nearest object is " << AssetVector[i].TexturePath
+                                << "\n";
+                            std::cout << "Mapped:\t" << i << ", " << mapping[i] << '\n';
+                            notFound = 0;
+                            nearestObject = i;
+                        }
                     }
 
                 }
             }
         }
+
+        if (isPopupShown) {
+            if (time - debounce > 0.33) {
+                float dist = glm::abs(camPos.x - AssetVector[nearestObject].pos.x) + glm::abs(camPos.z - AssetVector[nearestObject].pos.z);
+                if (dist > 6) {
+                    isPopupShown = false;
+                    nearestObject = -1;
+                    std::cout << "Closing Popup\n";
+                }
+                else {
+                    cw = glm::sign(YPR.x);
+                    float orientation = glm::abs(YPR.x);
+                    orientation = orientation - 6 * numCircles;
+                    if(!checkOrientation(AssetVector[nearestObject].pos.x, AssetVector[nearestObject].pos.z, camPos.x, camPos.z, orientation, cw )) {
+                        isPopupShown = false;
+                        nearestObject = -1;
+                        std::cout << "Closing Popup\n";
+                    }
+                }
+            }
+        }
+
         if (glfwGetKey(window, GLFW_KEY_L) && isPopupShown){
             isPopupShown = false;
             nearestObject = -1;
@@ -761,6 +795,35 @@ protected:
             }
         }
         return true;
+    }
+
+    bool checkOrientation(float obj_x, float obj_z, float my_x, float my_z, float orientation, int cw) {
+        //function to check if object is visible from my point of view, cw indicates if orientation was posive 
+        // (rotation clockwise) or negative (rotaion counter clockwise)
+        bool isSeen = 0;
+        obj_x = obj_x * cw;
+        my_x = my_x * cw;
+        if (orientation >= 5.25 && orientation <= 6.00 || orientation >= 0.0 && orientation <= 0.75 ) {
+            if (my_z > obj_z) {
+                isSeen = 1;
+            }
+        }
+        if (orientation >= 0.75 && orientation <= 2.25) {
+            if (my_x > obj_x) {
+                isSeen = 1;
+            }
+        }
+        if (orientation >= 2.25 && orientation <= 3.75) {
+            if (my_z < obj_z) {
+                isSeen = 1;
+            }
+        }
+        if (orientation >= 3.75 && orientation <= 5.25) {
+            if (my_x < obj_x) {
+                isSeen = 1;
+            }
+        }
+        return isSeen;
     }
 
 };
