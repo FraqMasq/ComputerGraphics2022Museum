@@ -62,7 +62,6 @@ const std::vector<Asset> AssetVector2 = {
         {"models/planets/PlanetsSphere.obj", "textures/planets/earth.jpg", {0.0,2.0, 4.0}, 0.25},
         {"models/planets/PlanetsSphere.obj", "textures/planets/mars.jpg", {0.0,2.0, 5.0}, 0.15},
         {"models/planets/PlanetsSphere.obj", "textures/planets/jupiter.jpg", {0.0,2.0, 8.0}, 1.1},
-        //{"models/planets/PlanetsSphere.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 10.0}, 1.0},
         {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 11.0}, 1.0},
         {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg", {0.0,2.0, 14.0}, 0.5},
         {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg", {0.0,2.0, 17.0}, 0.5}
@@ -536,13 +535,12 @@ protected:
         glm::vec3 oldPos = camPos;
         if (glfwGetKey(window, GLFW_KEY_LEFT) || (present== 1 && axes[2] <= -0.5)) {
             YPR.x += dt * omega;
+            //six should be a complete circle around the y axis
             numCircles = glm::floor(abs(YPR.x) / 6);
-            std::cout << "x: " << YPR.x << "\n";
         }
         if (glfwGetKey(window, GLFW_KEY_RIGHT) || (present== 1 && axes[2] >= 0.5)) {
             YPR.x -= dt * omega;
             numCircles = glm::floor(abs(YPR.x) / 6);
-            std::cout << "x: " << YPR.x << "\n";
         }
         if (glfwGetKey(window, GLFW_KEY_UP) || (present== 1 && axes[5] <= -0.5)) {
             YPR.y += dt * omega;
@@ -597,12 +595,12 @@ protected:
         }
 
         if (isPopupShown) {
-            if (time - debounce > 0.33) {
+            if (time - debounce > 0.99) {
                 float dist = glm::abs(camPos.x - AssetVector[nearestObject].pos.x) + glm::abs(camPos.z - AssetVector[nearestObject].pos.z);
                 if (dist > 6) {
                     isPopupShown = false;
                     nearestObject = -1;
-                    std::cout << "Closing Popup\n";
+                    std::cout << "Closing Popup for distance\n";
                 }
                 else {
                     cw = glm::sign(YPR.x);
@@ -611,7 +609,7 @@ protected:
                     if(!checkOrientation(AssetVector[nearestObject].pos.x, AssetVector[nearestObject].pos.z, camPos.x, camPos.z, orientation, cw )) {
                         isPopupShown = false;
                         nearestObject = -1;
-                        std::cout << "Closing Popup\n";
+                        std::cout << "Closing Popup for orientation\n";
                     }
                 }
             }
