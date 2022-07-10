@@ -58,7 +58,7 @@ const std::vector<Asset> AssetVector = {
 const std::vector<Asset> AssetVector2 = {
         {"models/misc/StructureScene2.obj", "textures/misc/StructureScene2Texture.jpeg", {0.0,0.0, 0.0}, 1.0},
 
-        {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg", {0.0,2.0, 0.0}, 1.0},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/sun.jpg", {0.0,2.0, 0.0}, 1.0},
         {"models/planets/PlanetsSphere.obj", "textures/planets/mercury.jpg", {0.0,2.0, 2.0}, 0.1},
         {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg", {0.0,2.0, 3.0}, 0.25},
         {"models/planets/PlanetsSphere.obj", "textures/planets/earth.jpg", {0.0,2.0, 4.0}, 0.25},
@@ -614,7 +614,7 @@ protected:
 
         gubo.proj = glm::perspective(glm::radians(45.0f),
             swapChainExtent.width / (float)swapChainExtent.height,
-            0.1f, 50.0f);
+            0.1f, 80.0f);
         gubo.proj[1][1] *= -1;
         // Matrix from light's point of view
         glm::mat4 depthProjectionMatrix = glm::perspective(glm::radians(70.0f), 1.0f, 3.0f, 10.0f);
@@ -712,13 +712,6 @@ protected:
                         glm::rotate(idMatrix, YPR.x, yAxis);
 
                 }
-                /*
-                 // @todo ruota intorno origine, deve ruotare l'oggetto
-                  if(i == HERCULES){
-                    ubo.model = ubo.model *
-                            glm::rotate(idMatrix, glm::radians(270.0f) * time,
-                            glm::vec3(0.0f, 1.0f, 0.0f));
-                }*/
                 vkMapMemory(device, componentsVector[i].DS.uniformBuffersMemory[0][currentImage], 0,
                     sizeof(ubo), 0, &data);
                 memcpy(data, &ubo, sizeof(ubo));
