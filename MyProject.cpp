@@ -35,7 +35,7 @@ const std::vector<Asset> AssetVector = {
         {"models/statues/discobolus.obj", "textures/statues/discobolusTexture.png", {1.416,0.0, -7.204}, 1.0},
         {"models/statues/pedestal.obj", "textures/statues/pedestal.jpg", {-0.5,0.0, -3.001}, 1.0},
         {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {-0.5,1.653, -2.989}, 1.0},
-        {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {7.578,0.0, -1.291}, 1.0},
+        {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {8.308,0.0, -1.278}, 1.0},
         
 
         {"models/paints/Frames.obj", "textures/paints/T_picture_frame_BaseColor.tga", {0.0,0.0, 0.0}, 1.0},
@@ -49,7 +49,9 @@ const std::vector<Asset> AssetVector = {
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpDavid.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpBathers.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpMunch.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2}
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
+
+        {"models/misc/doors.obj", "textures/misc/door.png", {3.142, 0.0, 2.012}, 1}
 
 };
 
@@ -64,12 +66,13 @@ const std::vector<Asset> AssetVector2 = {
         {"models/planets/PlanetsSphere.obj", "textures/planets/jupiter.jpg", {0.0,2.0, 8.0}, 1.1},
         {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 11.0}, 1.0},
         {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg", {0.0,2.0, 14.0}, 0.5},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg", {0.0,2.0, 17.0}, 0.5}
+        {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg", {0.0,2.0, 17.0}, 0.5},
+        {"models/misc/doors.obj", "textures/misc/door.png", {0.0, 0.0, 30.03}, 1}
        
 
 };
-const int numAssets = 17; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
-const int numAssets2 = 10; // 
+const int numAssets = 17 +1; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
+const int numAssets2 = 10 + 1; //
 
 //used to index AssetVector and ComponentVector
 enum ASSETS {STRUCTURE,
@@ -77,7 +80,13 @@ enum ASSETS {STRUCTURE,
         FRAMES,
         BATHERS, MUNCH, VANGOGH,
         POPUPVENUS, POPUPDISCOBOLUS, POPUPHERCULES, POPUPDAVID,
-        POPUPBATHERS, POPUPMUNCH, POPUPVANGOGH
+        POPUPBATHERS, POPUPMUNCH, POPUPVANGOGH,
+        DOOR
+};
+
+enum ASSETS2 {STRUCTURE2,
+    SUN, MERCURY, VENUS2, EARTH, MARS, JUPYTER, SATURN, NEPTUNE, URANUS,
+    DOOR2
 };
 
 const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
@@ -95,8 +104,8 @@ std::unordered_map<int, int> mapping = {
 };
 
 std::unordered_map<int, glm::vec3> scenePosMap = {
-        {0, glm::vec3(2.0f, 2.0f, 0.0f)},
-        {1, glm::vec3(2.0f, 2.0f, 0.0f)}
+        {0, AssetVector[DOOR].pos + glm::vec3(-1.142, 2.0, -2.012)},
+        {1, AssetVector2[DOOR2].pos + glm::vec3(0.0f, 2.0f, -2.03f)}
 };
 
 struct GlobalUniformBufferObject {
@@ -692,7 +701,7 @@ protected:
         }
         else{
                 for (int i = 0; i < numAssets2; i++) {
-                    if (i==0 || i == 1)
+                    if (i==STRUCTURE2 || i == SUN || i == DOOR2)
                         ubo.model = glm::translate(idMatrix, AssetVector2[i].pos) *
                             glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale));
                     else
