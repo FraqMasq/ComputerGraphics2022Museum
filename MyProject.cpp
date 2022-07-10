@@ -29,12 +29,12 @@ struct Component {
 
 
 const std::vector<Asset> AssetVector = {
-        {"models/misc/WallsAndFloor2.obj", "textures/misc/floor_wall.png", {0.0,0.0, 0.0}, 1.0},
+        {"models/misc/WallsAndFloor.obj", "textures/misc/ProvaOmbre.png", {0.0,0.0, 0.0}, 1.0},
 
         {"models/statues/venus.obj", "textures/statues/statue_venus.jpg", {6.222,0.0, -7.317}, 1.0},
         {"models/statues/discobolus.obj", "textures/statues/discobolusTexture.png", {1.416,0.0, -7.204}, 1.0},
-        {"models/statues/pedestal.obj", "textures/statues/pedestal.jpg", {-0.5,0.0, -3.001}, 1.0},
-        {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {-0.5,1.653, -2.989}, 1.0},
+        {"models/statues/pedestal.obj", "textures/statues/pedestal.jpg", {-1.103,0.0, -3.003}, 1.0},
+        {"models/statues/hercules.obj", "textures/statues/hercules.jpg", {-1.135,1.647, -2.989}, 1.0},
         {"models/statues/davidStatue.obj", "textures/statues/davidTexture.jpg", {8.308,0.0, -1.278}, 1.0},
         
 
@@ -123,10 +123,12 @@ struct GlobalUniformBufferObject {
     alignas(16) glm::vec3 spotDirection3;
     alignas(16) glm::mat4 view;
     alignas(16) glm::mat4 proj;
+    alignas(16) glm::mat4 lightVP;
 };
 
 struct UniformBufferObject {
     alignas(16) glm::mat4 model;
+    alignas(16) bool projectShadow = 0;
 
 };
 
@@ -157,6 +159,8 @@ protected:
     DescriptorSet DS_GLOBAL;
     DescriptorSet DS_GLOBAL2;
 
+    Texture TShadowHercules;
+
     Map museumMap;
 
     std::vector<Component> componentsVector;
@@ -184,9 +188,9 @@ protected:
 
         // Descriptor pool sizes -> modify if add other models
         //per il cambio di scena?
-        uniformBlocksInPool = numAssets + numAssets2 + 2;
-        texturesInPool = numAssets + numAssets2;
-        setsInPool = numAssets + numAssets2 + 2;
+        uniformBlocksInPool = numAssets + numAssets2 + 2 ;
+        texturesInPool = numAssets + numAssets2 + 5;
+        setsInPool = numAssets + numAssets2 + 2 + 5;
     }
 
     // Here you load and setup all your Vulkan objects
@@ -194,7 +198,8 @@ protected:
         // Descriptor Layouts [what will be passed to the shaders]
         
             DSLGlobal.init(this, {
-                    {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
+                    {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
+                    {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
                 });
 
             //DSLGlobal2.init(this, {
@@ -276,14 +281,17 @@ protected:
             // third  element : only for UNIFORMs, the size of the corresponding C++ object
             // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
 
-
+            TShadowHercules.init(this, "textures/shadows/HerculesShadowMap.png");
 
             DS_GLOBAL.init(this, &DSLGlobal, {
-                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
+                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr},
+                    {1, TEXTURE, 0, &TShadowHercules}
+
                 });
 
             DS_GLOBAL2.init(this, &DSLGlobal, {
-                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
+                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr},
+                    {1, TEXTURE, 0, &TShadowHercules}
                 });
 
            
@@ -317,6 +325,8 @@ protected:
             componentsVector2[j].T.cleanup();
             componentsVector2[j].DS.cleanup();
         }
+
+        TShadowHercules.cleanup();
 
         DS_GLOBAL.cleanup();
         DS_GLOBAL2.cleanup();
@@ -606,6 +616,14 @@ protected:
             swapChainExtent.width / (float)swapChainExtent.height,
             0.1f, 50.0f);
         gubo.proj[1][1] *= -1;
+        // Matrix from light's point of view
+        glm::mat4 depthProjectionMatrix = glm::perspective(glm::radians(70.0f), 1.0f, 3.0f, 10.0f);
+        glm::mat4 depthViewMatrix = glm::lookAt(glm::vec3(2.0f, 4.0f, -3.0f), AssetVector[HERCULES].pos, glm::vec3(0, 1, 0));
+        depthProjectionMatrix[1][1] *= -1;
+        glm::mat4 depthModelMatrix = glm::mat4(1.0f);
+
+        gubo.lightVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
 
         gubo.lightPos1 = glm::vec3(4.0f, 6.15f, -3.247f); //light between the statues
         gubo.lightPos2 = glm::vec3(11.57f, 6.515f, 7.192f); //light for the paintings
@@ -633,10 +651,10 @@ protected:
         //theta = glm::atan(glm::abs(AssetVector[5].pos.z - gubo.spotPositions[2].z) , glm::abs(AssetVector[5].pos.x - gubo.spotPositions[2].x));
         theta = glm::radians(160.0f);
         gubo.spotDirection2 = glm::vec3(cos(theta), sin(theta), 0.0f);
-        //theta = glm::atan(glm::abs(AssetVector[4].pos.z - gubo.spotPositions[3].z) , glm::abs(AssetVector[4].pos.x - gubo.spotPositions[3].x));
+        //theta = glm::atan(glm::abs(AssetVector[HERCULES].pos.z - gubo.spotPosition4.z) , glm::abs(AssetVector[HERCULES].pos.x - gubo.spotPosition4.x));
         theta = glm::radians(20.0f);
         gubo.spotDirection3 = glm::vec3(cos(theta), sin(theta), 0.0f);
-        
+        gubo.spotDirection3 = glm::normalize((gubo.spotPosition4 - AssetVector[HERCULES].pos));
         /*
         //per i quadri
         float theta = glm::radians(150.0f);
@@ -675,6 +693,14 @@ protected:
             
         if (curText == 0) {
             for (int i = 0; i < numAssets; i++) {
+
+                if(i == STRUCTURE){
+                    ubo.projectShadow = 1;
+                }
+                else{
+                    ubo.projectShadow = 0;
+                }
+
                 ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
                     glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));
 
