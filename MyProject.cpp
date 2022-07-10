@@ -94,6 +94,11 @@ std::unordered_map<int, int> mapping = {
 
 };
 
+std::unordered_map<int, glm::vec3> scenePosMap = {
+        {0, glm::vec3(2.0f, 2.0f, 0.0f)},
+        {1, glm::vec3(2.0f, 2.0f, 0.0f)}
+};
+
 struct GlobalUniformBufferObject {
     alignas(16) glm::vec3 lightPos1;
     alignas(16) glm::vec3 lightPos2;
@@ -126,7 +131,7 @@ const glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
 class MyProject : public BaseProject {
 protected:
     //
-    glm::vec3 camPos = glm::vec3(2.0f, 2.0f, 0.0f);
+    glm::vec3 camPos = scenePosMap[0];
 
     // Here you list all the Vulkan objects you need:
 
@@ -398,60 +403,6 @@ protected:
 
             }
         }
-        /* = {componentsVector[STRUCTURE].M.vertexBuffer,
-                                    componentsVector[VENUS].M.vertexBuffer,
-                                    componentsVector[DISCOBOLUS].M.vertexBuffer};
-
-
-        // property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
-        //VkDeviceSize offsets[] = {0};
-
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[VENUS], offsets);
-        // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
-        vkCmdBindIndexBuffer(commandBuffer, componentsVector[VENUS].M.indexBuffer, 0,
-                                VK_INDEX_TYPE_UINT32);
-
-        // property .pipelineLayout of a pipeline contains its layout.
-        // property .descriptorSets of a descriptor set contains its elements.
-        vkCmdBindDescriptorSets(commandBuffer,
-                        VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        P1.pipelineLayout, 1, 1, &componentsVector[VENUS].DS.descriptorSets[currentImage],
-                        0, nullptr);
-
-
-
-        // property .indices.size() of models, contains the number of triangles * 3 of the mesh.
-        vkCmdDrawIndexed(commandBuffer,
-                    static_cast<uint32_t>(componentsVector[VENUS].M.indices.size()), 1, 0, 0, 0);
-
-
-        VkBuffer vertexBuffersDisco[] = {componentsVector[DISCOBOLUS].M.vertexBuffer};
-        // property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
-        VkDeviceSize offsetsDisco[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[DISCOBOLUS], offsets);
-        // property .indexBuffer of models, contains the VkBuffer handle to its index buffer
-        vkCmdBindIndexBuffer(commandBuffer, componentsVector[DISCOBOLUS].M.indexBuffer, 0,
-                             VK_INDEX_TYPE_UINT32);
-        vkCmdBindDescriptorSets(commandBuffer,
-                                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                P1.pipelineLayout, 1, 1, &componentsVector[DISCOBOLUS].DS.descriptorSets[currentImage],
-                                0, nullptr);
-        vkCmdDrawIndexed(commandBuffer,
-                         static_cast<uint32_t>(componentsVector[DISCOBOLUS].M.indices.size()), 1, 0, 0, 0);
-
-
-        VkBuffer vertexBuffersStruct[] = {componentsVector[STRUCTURE].M.vertexBuffer};
-        VkDeviceSize offsetsStruct[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers[STRUCTURE], offsets);
-        vkCmdBindIndexBuffer(commandBuffer, componentsVector[STRUCTURE].M.indexBuffer, 0,
-                             VK_INDEX_TYPE_UINT32);
-        vkCmdBindDescriptorSets(commandBuffer,
-                                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                P1.pipelineLayout, 1, 1, &componentsVector[STRUCTURE].DS.descriptorSets[currentImage],
-                                0, nullptr);
-        vkCmdDrawIndexed(commandBuffer,
-                         static_cast<uint32_t>(componentsVector[STRUCTURE].M.indices.size()), 1, 0, 0, 0);
-*/
     }
 
 
@@ -510,7 +461,7 @@ protected:
             nearestObject = -1;
         }
 
-        static glm::vec3 YPR = glm::vec3(glm::radians(0.0f), 0.0f, glm::radians(0.0f));
+        static glm::vec3 YPR = glm::vec3(0.0f, 0.0f, 0.0f);
 
         static glm::vec3 ux = glm::vec3(glm::rotate(idMatrix, YPR.x, yAxis) *
             glm::vec4(1, 0, 0, 1));
@@ -627,6 +578,8 @@ protected:
                 debounce = time;
                 framebufferResized = true;
                 std::cout << curText << "\n";
+                camPos = scenePosMap[curText];
+                YPR = glm::vec3(0.0f, 0.0f, 0.0f);
             }
         }
 
@@ -758,13 +711,7 @@ protected:
                             glm::rotate(idMatrix, YPR.x, yAxis);
 
                     }
-                    /*
-                     // @todo ruota intorno origine, deve ruotare l'oggetto
-                      if(i == HERCULES){
-                        ubo.model = ubo.model *
-                                glm::rotate(idMatrix, glm::radians(270.0f) * time,
-                                glm::vec3(0.0f, 1.0f, 0.0f));
-                    }*/
+
                     vkMapMemory(device, componentsVector2[i].DS.uniformBuffersMemory[0][currentImage], 0,
                         sizeof(ubo), 0, &data);
                     memcpy(data, &ubo, sizeof(ubo));

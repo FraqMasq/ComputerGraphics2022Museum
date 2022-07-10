@@ -763,7 +763,9 @@ protected:
 			glfwWaitEvents();
 		}
 
+
 		vkDeviceWaitIdle(device);
+        cleanupSwapChain();
 
 		createSwapChain();
 		createImageViews();
