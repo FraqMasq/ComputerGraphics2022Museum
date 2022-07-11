@@ -17,7 +17,7 @@ struct Asset {
 struct Map {
     stbi_uc* museumMap;
     int museumMapWidth, museumMapHeight;
-    void loadMap();
+    void loadMap(const std::string);
 };
 
 
@@ -99,6 +99,7 @@ enum ASSETS2 {STRUCTURE2,
 };
 
 const std::string MAP_TEXTURE_PATH = "textures/MuseumCanStep.png";
+const std::string MAP2_TEXTURE_PATH = "textures/canStep_planet.png";
 
 std::unordered_map<int, int> mapping = {
         {VENUS, POPUPVENUS},
@@ -117,7 +118,7 @@ std::unordered_map<int, int> mapping = {
 
 std::unordered_map<int, glm::vec3> scenePosMap = {
         {0, AssetVector[DOOR].pos + glm::vec3(-1.142, 2.0, -2.012)},
-        {1, AssetVector2[DOOR2].pos + glm::vec3(0.0f, 2.0f, -2.03f)}
+        {1, AssetVector2[DOOR2].pos + glm::vec3(0.0f, 2.0f, -5.03f)}
 };
 
 struct GlobalUniformBufferObject {
@@ -170,14 +171,14 @@ protected:
     DescriptorSet DS_GLOBAL;
     DescriptorSet DS_GLOBAL2;
 
-
-    Map museumMap;
-
     std::vector<Component> componentsVector;
     std::vector<Component> componentsVector2;
 
     bool isPopupShown = false;
     int num_scenes = 2;
+
+    std::vector<Map> museumMaps;
+
 
 public:
 
@@ -300,8 +301,9 @@ protected:
                 });
 
            
-
-            museumMap.loadMap();
+            museumMaps.resize(num_scenes);
+            museumMaps[0].loadMap(MAP_TEXTURE_PATH);
+            museumMaps[1].loadMap(MAP2_TEXTURE_PATH);
         
     }
 
@@ -635,7 +637,6 @@ protected:
                     }
                     else {
                         if (curScene == 1) {
-                            std::cout << "door2:" << DOOR2 << "\n";
                             if (checkOrientation(AssetVector2[DOOR2].pos.x, AssetVector2[DOOR2].pos.z, camPos.x, camPos.z, orientation, cw)) {
 
                                 curScene = (curScene + 1) % num_scenes;
@@ -653,7 +654,7 @@ protected:
         }
         
         // provvisorio, eventualmente aggiungere un'altra mappa
-        if (curScene == 0 && !canStep(camPos.x, camPos.z)) {
+        if (!canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
         }
 
@@ -800,20 +801,25 @@ protected:
                 }
         }
     }
-    bool canStepPoint(float x, float y) {
+    bool canStepPoint(int ind, float x, float y) {
         //museumMap.museumMapWidth/16.0 -> pixel in 1 meter
         //added 0.5 and 6 because floor is not centered in zero
-        int pixX = round(fmax(0.0f, fmin(museumMap.museumMapWidth - 1, ((x + 8 - 6) * museumMap.museumMapWidth / 16.0)))); //20
-        int pixY = round(fmax(0.0f, fmin(museumMap.museumMapHeight - 1, ((y + 9.5 - 0.5) * museumMap.museumMapHeight / 19.0)))); //20
-        int pix = (int)museumMap.museumMap[museumMap.museumMapWidth * pixY + pixX];
+        std::vector<float> map_w = { 16.0, 66.0};
+        std::vector<float> map_h = { 19.0, 66.0};
+        std::vector<float> map_cx = { 6.0, 0.0};
+        std::vector<float> map_cy = { 0.5, 0.0};
+        int pixX = round(fmax(0.0f, fmin(museumMaps[ind].museumMapWidth - 1, ((x + map_w[ind]/2 - map_cx[ind]) * museumMaps[ind].museumMapWidth / map_w[ind])))); //20
+        int pixY = round(fmax(0.0f, fmin(museumMaps[ind].museumMapHeight - 1, ((y + map_h[ind]/2 - map_cy[ind]) * museumMaps[ind].museumMapHeight / map_h[ind])))); //20
+        int pix = (int)museumMaps[ind].museumMap[museumMaps[ind].museumMapWidth * pixY + pixX];
         return pix > 128; //check if pixel is white (?)
     }
     const float checkRadius = 0.1;
     const int checkSteps = 12; //12
 
     bool canStep(float x, float y) {
+       
         for (int i = 0; i < checkSteps; i++) {
-            if (!canStepPoint(x + cos(6.2832 * i / (float)checkSteps) * checkRadius,
+            if (!canStepPoint(curScene, x + cos(6.2832 * i / (float)checkSteps) * checkRadius,
                 y + sin(6.2832 * i / (float)checkSteps) * checkRadius)) {
                 std::cout << "Hit something \n";
 
@@ -856,15 +862,15 @@ protected:
     
 
 
-void Map::loadMap() {
-    museumMap = stbi_load(MAP_TEXTURE_PATH.c_str(),
+void Map::loadMap(const std::string map_path) {
+    museumMap = stbi_load(map_path.c_str(),
         &museumMapWidth, &museumMapHeight,
         NULL, 1);
     if (!museumMap) {
-        std::cout << MAP_TEXTURE_PATH.c_str() << "\n";
+        std::cout << map_path.c_str() << "\n";
         throw std::runtime_error("failed to load map image!");
     }
-    std::cout << "Station map -> size: " << museumMapWidth
+    std::cout << "Museum map -> size: " << museumMapWidth
         << "x" << museumMapHeight << "\n";
 }
 
