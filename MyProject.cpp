@@ -582,24 +582,29 @@ protected:
             nearestObject = -1;
             std::cout << "Closing Popup\n";
         }
-        /*
+        
         if (glfwGetKey(window, GLFW_KEY_SPACE)) {
             if (time - debounce > 0.33) {
                 float door_dist;
+                int door_pos;
+                //check we are close to the door to allow change of scene
                 if (curScene == 0) {
-                    door_dist = glm::abs(camPos.x - AssetVector[17].pos.x) + glm::abs(camPos.z - AssetVector[17].pos.z);
+                    door_pos = 17;
+                    door_dist = glm::abs(camPos.x - AssetVector[door_pos].pos.x) + glm::abs(camPos.z - AssetVector[door_pos].pos.z);
                 }
                 else {
                     if (curScene == 1)
-                        door_dist = glm::abs(camPos.x - AssetVector2[10].pos.x) + glm::abs(camPos.z - AssetVector2[10].pos.z);
+                        door_pos = 10;
+                        door_dist = glm::abs(camPos.x - AssetVector2[door_pos].pos.x) + glm::abs(camPos.z - AssetVector2[door_pos].pos.z);
                 }
                 
+                //check we are facing the door
                 if (door_dist <= 5) {
                     cw = glm::sign(YPR.x);
                     float orientation = glm::abs(YPR.x);
                     orientation = orientation - 6 * numCircles;
                     if (curScene == 0) {
-                        if (checkOrientation(AssetVector[17].pos.x, AssetVector[17].pos.z, camPos.x, camPos.z, orientation, cw)) {
+                        if (checkOrientation(AssetVector[door_pos].pos.x, AssetVector[door_pos].pos.z, camPos.x, camPos.z, orientation, cw)) {
 
                             curScene = (curScene + 1) % num_scenes;
                             debounce = time;
@@ -609,11 +614,24 @@ protected:
                             YPR = glm::vec3(0.0f, 0.0f, 0.0f);
                         }
                     }
+                    else {
+                        if (curScene == 1) {
+                            if (checkOrientation(AssetVector2[door_pos].pos.x, AssetVector2[door_pos].pos.z, camPos.x, camPos.z, orientation, cw)) {
+
+                                curScene = (curScene + 1) % num_scenes;
+                                debounce = time;
+                                framebufferResized = true;
+                                std::cout << curScene << "\n";
+                                camPos = scenePosMap[curScene];
+                                YPR = glm::vec3(0.0f, 0.0f, 0.0f);
+                            }
+                        }
+                    }
                 }
                 
             }
         }
-        */
+        
         // provvisorio, eventualmente aggiungere un'altra mappa
         if (curScene == 0 && !canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
