@@ -54,9 +54,9 @@ const std::vector<Asset> AssetVector = {
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpBathers.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpMunch.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
-        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpManet.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpMatisse.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpMonet.png", {-5.0, -5.0, -5.0}, 0.2},
 
         {"models/misc/doors.obj", "textures/misc/door.png", {3.142, 0.0, 2.012}, 1}
 
@@ -74,12 +74,13 @@ const std::vector<Asset> AssetVector2 = {
         {"models/planets/Staturn.obj", "textures/planets/saturnWithRings.jpg", {0.0,2.0, 11.0}, 1.0},
         {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg", {0.0,2.0, 14.0}, 0.5},
         {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg", {0.0,2.0, 17.0}, 0.5},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpSolarSystem.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/doors.obj", "textures/misc/door.png", {0.0, 0.0, 30.03}, 1}
        
 
 };
 const int numAssets = 17 +1 + 6; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
-const int numAssets2 = 10 + 1; //
+const int numAssets2 = 10 + 1 + 1; //
 
 //used to index AssetVector and ComponentVector
 enum ASSETS {STRUCTURE,
@@ -93,6 +94,7 @@ enum ASSETS {STRUCTURE,
 
 enum ASSETS2 {STRUCTURE2,
     SUN, MERCURY, VENUS2, EARTH, MARS, JUPYTER, SATURN, NEPTUNE, URANUS,
+    POPUPSOLARSYSTEM,
     DOOR2
 };
 
