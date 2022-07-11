@@ -123,12 +123,10 @@ struct GlobalUniformBufferObject {
     alignas(16) glm::vec3 spotDirection3;
     alignas(16) glm::mat4 view;
     alignas(16) glm::mat4 proj;
-    alignas(16) glm::mat4 lightVP;
 };
 
 struct UniformBufferObject {
     alignas(16) glm::mat4 model;
-    alignas(16) bool projectShadow = false;
 
 };
 
@@ -159,7 +157,6 @@ protected:
     DescriptorSet DS_GLOBAL;
     DescriptorSet DS_GLOBAL2;
 
-    Texture TShadowHercules;
 
     Map museumMap;
 
@@ -198,8 +195,7 @@ protected:
         // Descriptor Layouts [what will be passed to the shaders]
         
             DSLGlobal.init(this, {
-                    {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS},
-                    {1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
+                    {0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS}
                 });
 
             //DSLGlobal2.init(this, {
@@ -281,17 +277,14 @@ protected:
             // third  element : only for UNIFORMs, the size of the corresponding C++ object
             // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
 
-            TShadowHercules.init(this, "textures/shadows/HerculesShadowMap.png");
 
             DS_GLOBAL.init(this, &DSLGlobal, {
                     {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr},
-                    {1, TEXTURE, 0, &TShadowHercules}
 
                 });
 
             DS_GLOBAL2.init(this, &DSLGlobal, {
-                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr},
-                    {1, TEXTURE, 0, &TShadowHercules}
+                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
                 });
 
            
@@ -326,7 +319,6 @@ protected:
             componentsVector2[j].DS.cleanup();
         }
 
-        TShadowHercules.cleanup();
 
         DS_GLOBAL.cleanup();
         DS_GLOBAL2.cleanup();
@@ -642,7 +634,7 @@ protected:
         depthProjectionMatrix[1][1] *= -1;
         glm::mat4 depthModelMatrix = glm::mat4(1.0f);
 
-        gubo.lightVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
 
 
         gubo.lightPos1 = glm::vec3(4.0f, 6.15f, -3.247f); //light between the statues
@@ -714,12 +706,6 @@ protected:
         if (curText == 0) {
             for (int i = 0; i < numAssets; i++) {
 
-                if(i == STRUCTURE){
-                    ubo.projectShadow = true;
-                }
-                else{
-                    ubo.projectShadow = false;
-                }
 
                 ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
                     glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));

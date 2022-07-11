@@ -17,7 +17,6 @@ layout(set=0, binding = 0) uniform GlobalUniformBufferObject {
 	mat4 proj;
 } gubo;
 
-layout(set=0, binding = 1) uniform sampler2D shadowMapSampler;
 
 layout(set=1, binding = 1) uniform sampler2D texSampler;
 
@@ -26,7 +25,6 @@ layout(location = 0) in vec3 fragViewDir;
 layout(location = 1) in vec3 fragNorm;
 layout(location = 2) in vec2 fragTexCoord;
 layout(location = 3) in vec3 fragPos;
-layout (location = 4) in vec4 inShadowCoord;
 
 layout(location = 0) out vec4 outColor;
 
@@ -134,20 +132,6 @@ vec3 compute_Color(vec3 N, vec3 V, vec3 Cd, vec3 Cs, float gamma) {
 	return computed_col;
 }
 
-float textureProj(vec4 shadowCoord, vec2 off)
-{
-	float shadow = 1.0;
-
-	if ( shadowCoord.z > 0 && shadowCoord.z < 1.0 && shadowCoord.x > 0 && shadowCoord.x < 1.0 && shadowCoord.y > 0 && shadowCoord.y < 1.0)
-	{
-		float dist = texture( shadowMapSampler, shadowCoord.st + off ).r;
-		if ( shadowCoord.w > 0 && dist < shadowCoord.z )
-		{
-			shadow = 0.1;
-		}
-	}
-	return shadow;
-}
 
 
 
@@ -155,7 +139,6 @@ void main() {
 	vec3 Norm = normalize(fragNorm);
 	vec3 EyeDir = normalize(fragViewDir);
 	float gamma = 200.0f;
-	float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
 	//float AmbFact = 0.025;
 	
 	vec3 DifCol = texture(texSampler, fragTexCoord).rgb;
@@ -164,5 +147,5 @@ void main() {
 
 
 	vec3 CompColor = compute_Color(Norm, EyeDir, DifCol, SpecCol,  gamma) ;
-	outColor = vec4(CompColor * shadow, 1.0);//vec4(CompColor, 1.0f);
+	outColor = vec4(CompColor, 1.0);//vec4(CompColor, 1.0f);
 }
