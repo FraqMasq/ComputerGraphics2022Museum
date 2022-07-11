@@ -128,7 +128,7 @@ struct GlobalUniformBufferObject {
 
 struct UniformBufferObject {
     alignas(16) glm::mat4 model;
-    alignas(16) bool projectShadow = 0;
+    alignas(16) bool projectShadow = false;
 
 };
 
@@ -590,18 +590,38 @@ protected:
             nearestObject = -1;
             std::cout << "Closing Popup\n";
         }
-
+        /*
         if (glfwGetKey(window, GLFW_KEY_SPACE)) {
             if (time - debounce > 0.33) {
-                curText = (curText + 1) % num_scenes;
-                debounce = time;
-                framebufferResized = true;
-                std::cout << curText << "\n";
-                camPos = scenePosMap[curText];
-                YPR = glm::vec3(0.0f, 0.0f, 0.0f);
+                float door_dist;
+                if (curText == 0) {
+                    door_dist = glm::abs(camPos.x - AssetVector[17].pos.x) + glm::abs(camPos.z - AssetVector[17].pos.z);
+                }
+                else {
+                    if (curText == 1)
+                        door_dist = glm::abs(camPos.x - AssetVector2[10].pos.x) + glm::abs(camPos.z - AssetVector2[10].pos.z);
+                }
+                
+                if (door_dist <= 5) {
+                    cw = glm::sign(YPR.x);
+                    float orientation = glm::abs(YPR.x);
+                    orientation = orientation - 6 * numCircles;
+                    if (curText == 0) {
+                        if (checkOrientation(AssetVector[17].pos.x, AssetVector[17].pos.z, camPos.x, camPos.z, orientation, cw)) {
+
+                            curText = (curText + 1) % num_scenes;
+                            debounce = time;
+                            framebufferResized = true;
+                            std::cout << curText << "\n";
+                            camPos = scenePosMap[curText];
+                            YPR = glm::vec3(0.0f, 0.0f, 0.0f);
+                        }
+                    }
+                }
+                
             }
         }
-
+        */
         // provvisorio, eventualmente aggiungere un'altra mappa
         if (curText == 0 && !canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
@@ -695,10 +715,10 @@ protected:
             for (int i = 0; i < numAssets; i++) {
 
                 if(i == STRUCTURE){
-                    ubo.projectShadow = 1;
+                    ubo.projectShadow = true;
                 }
                 else{
-                    ubo.projectShadow = 0;
+                    ubo.projectShadow = false;
                 }
 
                 ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
