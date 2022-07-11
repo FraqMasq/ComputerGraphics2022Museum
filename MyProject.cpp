@@ -186,8 +186,8 @@ protected:
         // Descriptor pool sizes -> modify if add other models
         //per il cambio di scena?
         uniformBlocksInPool = numAssets + numAssets2 + 2 ;
-        texturesInPool = numAssets + numAssets2 + 5;
-        setsInPool = numAssets + numAssets2 + 2 + 5;
+        texturesInPool = numAssets + numAssets2;
+        setsInPool = numAssets + numAssets2 + 2;
     }
 
     // Here you load and setup all your Vulkan objects
