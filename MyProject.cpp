@@ -164,7 +164,7 @@ protected:
     std::vector<Component> componentsVector2;
 
     bool isPopupShown = false;
-    int curText = 0;
+    int curScene = 0;
     int num_scenes = 2;
 
 public:
@@ -353,18 +353,18 @@ protected:
     // with their buffers and textures
     void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, curText == 0 ? 
-            P1.graphicsPipeline : P2.graphicsPipeline);
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, curScene == 0 ?
+                                                                          P1.graphicsPipeline : P2.graphicsPipeline);
 
        
         vkCmdBindDescriptorSets(commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            curText == 0 ? P1.pipelineLayout : P2.pipelineLayout, 0, 1, curText == 0 ? &DS_GLOBAL.descriptorSets[currentImage] : &DS_GLOBAL2.descriptorSets[currentImage],
-            0, nullptr);
+                                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                curScene == 0 ? P1.pipelineLayout : P2.pipelineLayout, 0, 1, curScene == 0 ? &DS_GLOBAL.descriptorSets[currentImage] : &DS_GLOBAL2.descriptorSets[currentImage],
+                                0, nullptr);
 
         VkDeviceSize offsets[] = { 0 };
 
-        if (curText == 0) {
+        if (curScene == 0) {
             VkBuffer vertexBuffers[numAssets][1];
             for (int i = 0; i < numAssets; i++) {
                 vertexBuffers[i][0] = componentsVector[i].M.vertexBuffer;
@@ -533,7 +533,7 @@ protected:
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
         
-        if (curText == 0 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
+        if (curScene == 0 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
             if(time - debounce > 0.33) {
                 int notFound = 1;
                 for (int i = 1; i < numAssets && notFound; i++) {
@@ -586,11 +586,11 @@ protected:
         if (glfwGetKey(window, GLFW_KEY_SPACE)) {
             if (time - debounce > 0.33) {
                 float door_dist;
-                if (curText == 0) {
+                if (curScene == 0) {
                     door_dist = glm::abs(camPos.x - AssetVector[17].pos.x) + glm::abs(camPos.z - AssetVector[17].pos.z);
                 }
                 else {
-                    if (curText == 1)
+                    if (curScene == 1)
                         door_dist = glm::abs(camPos.x - AssetVector2[10].pos.x) + glm::abs(camPos.z - AssetVector2[10].pos.z);
                 }
                 
@@ -598,14 +598,14 @@ protected:
                     cw = glm::sign(YPR.x);
                     float orientation = glm::abs(YPR.x);
                     orientation = orientation - 6 * numCircles;
-                    if (curText == 0) {
+                    if (curScene == 0) {
                         if (checkOrientation(AssetVector[17].pos.x, AssetVector[17].pos.z, camPos.x, camPos.z, orientation, cw)) {
 
-                            curText = (curText + 1) % num_scenes;
+                            curScene = (curScene + 1) % num_scenes;
                             debounce = time;
                             framebufferResized = true;
-                            std::cout << curText << "\n";
-                            camPos = scenePosMap[curText];
+                            std::cout << curScene << "\n";
+                            camPos = scenePosMap[curScene];
                             YPR = glm::vec3(0.0f, 0.0f, 0.0f);
                         }
                     }
@@ -615,7 +615,7 @@ protected:
         }
         */
         // provvisorio, eventualmente aggiungere un'altra mappa
-        if (curText == 0 && !canStep(camPos.x, camPos.z)) {
+        if (curScene == 0 && !canStep(camPos.x, camPos.z)) {
             camPos = oldPos;
         }
 
@@ -678,7 +678,7 @@ protected:
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
         gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 2.0f);
 
-        if (curText == 0) {
+        if (curScene == 0) {
             vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
                 sizeof(gubo), 0, &data);
 
@@ -703,7 +703,7 @@ protected:
             vkUnmapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage]);
         }
             
-        if (curText == 0) {
+        if (curScene == 0) {
             for (int i = 0; i < numAssets; i++) {
 
 
