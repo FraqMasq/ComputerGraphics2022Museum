@@ -152,7 +152,8 @@ const glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
 class MyProject : public BaseProject {
 protected:
     //
-    glm::vec3 camPos = scenePosMap[0];
+    int curScene = 0;
+    glm::vec3 camPos = scenePosMap[curScene];
 
     // Here you list all the Vulkan objects you need:
 
@@ -176,7 +177,6 @@ protected:
     std::vector<Component> componentsVector2;
 
     bool isPopupShown = false;
-    int curScene = 0;
     int num_scenes = 2;
 
 public:
@@ -474,7 +474,16 @@ protected:
         void* data;
 
         float omega, mu, dt;
-        std::vector<float> planet_v = {0.0, 0.0, 1.0, 0.7, 0.5, 0.4, 0.2, 0.05, 0.04, 0.04 };
+        std::vector<float> planet_v;
+        planet_v.resize(numAssets2);
+        planet_v[MERCURY] = 1.0;
+        planet_v[VENUS2] = 0.7;
+        planet_v[EARTH] = 0.5;
+        planet_v[MARS] = 0.4;
+        planet_v[JUPYTER] = 0.2;
+        planet_v[SATURN] = 0.05;
+        planet_v[URANUS] = 0.04;
+        planet_v[NEPTUNE] = 0.04;
 
         static int nearestObject;
         int numCircles = 0;
@@ -598,16 +607,14 @@ protected:
         if (glfwGetKey(window, GLFW_KEY_SPACE)) {
             if (time - debounce > 0.33) {
                 float door_dist;
-                int door_pos;
+                //int door_pos;
                 //check we are close to the door to allow change of scene
                 if (curScene == 0) {
-                    door_pos = 17;
-                    door_dist = glm::abs(camPos.x - AssetVector[door_pos].pos.x) + glm::abs(camPos.z - AssetVector[door_pos].pos.z);
+                    door_dist = glm::abs(camPos.x - AssetVector[DOOR].pos.x) + glm::abs(camPos.z - AssetVector[DOOR].pos.z);
                 }
                 else {
                     if (curScene == 1)
-                        door_pos = 10;
-                        door_dist = glm::abs(camPos.x - AssetVector2[door_pos].pos.x) + glm::abs(camPos.z - AssetVector2[door_pos].pos.z);
+                        door_dist = glm::abs(camPos.x - AssetVector2[DOOR2].pos.x) + glm::abs(camPos.z - AssetVector2[DOOR2].pos.z);
                 }
                 
                 //check we are facing the door
@@ -616,7 +623,7 @@ protected:
                     float orientation = glm::abs(YPR.x);
                     orientation = orientation - 6 * numCircles;
                     if (curScene == 0) {
-                        if (checkOrientation(AssetVector[door_pos].pos.x, AssetVector[door_pos].pos.z, camPos.x, camPos.z, orientation, cw)) {
+                        if (checkOrientation(AssetVector[DOOR].pos.x, AssetVector[DOOR].pos.z, camPos.x, camPos.z, orientation, cw)) {
 
                             curScene = (curScene + 1) % num_scenes;
                             debounce = time;
@@ -628,7 +635,8 @@ protected:
                     }
                     else {
                         if (curScene == 1) {
-                            if (checkOrientation(AssetVector2[door_pos].pos.x, AssetVector2[door_pos].pos.z, camPos.x, camPos.z, orientation, cw)) {
+                            std::cout << "door2:" << DOOR2 << "\n";
+                            if (checkOrientation(AssetVector2[DOOR2].pos.x, AssetVector2[DOOR2].pos.z, camPos.x, camPos.z, orientation, cw)) {
 
                                 curScene = (curScene + 1) % num_scenes;
                                 debounce = time;
