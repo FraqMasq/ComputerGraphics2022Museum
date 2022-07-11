@@ -42,6 +42,10 @@ const std::vector<Asset> AssetVector = {
         {"models/paints/HorizontalPicture.obj", "textures/paints/theBathers_Cezanne.jpg", {9.393, 2.842, 1.641}, 1.0},
         {"models/paints/VerticalPicture.obj", "textures/paints/Munch_Scream.jpg", {13.97, 3.558, -1.757}, 1.0},
         {"models/paints/VerticalPicture.obj", "textures/paints/VanGogh_self.jpg", {13.97, 3.558, 2.558}, 1.0},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/Manet_Dejeuner.jpg", {14.01, 3.182, 7.035}, 1.0},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/Matisse_theDance.jpg", {9.365, 2.85, 6.409}, 1.0},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/Monet-Sunrise.jpg", {11.66, 3.182, 10.01}, 1.0},
+
 
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVenus.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpDiscobolus.png", {-5.0, -5.0, -5.0}, 0.2},
@@ -49,6 +53,9 @@ const std::vector<Asset> AssetVector = {
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpDavid.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpBathers.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpMunch.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
+        {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
         {"models/misc/PopUp.obj", "textures/misc/popup/PopUpVanGogh.png", {-5.0, -5.0, -5.0}, 0.2},
 
         {"models/misc/doors.obj", "textures/misc/door.png", {3.142, 0.0, 2.012}, 1}
@@ -71,16 +78,16 @@ const std::vector<Asset> AssetVector2 = {
        
 
 };
-const int numAssets = 17 +1; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
+const int numAssets = 17 +1 + 6; // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
 const int numAssets2 = 10 + 1; //
 
 //used to index AssetVector and ComponentVector
 enum ASSETS {STRUCTURE,
         VENUS, DISCOBOLUS, PEDESTAL, HERCULES, DAVID,
         FRAMES,
-        BATHERS, MUNCH, VANGOGH,
+        BATHERS, MUNCH, VANGOGH, MANET, MATISSE, MONET,
         POPUPVENUS, POPUPDISCOBOLUS, POPUPHERCULES, POPUPDAVID,
-        POPUPBATHERS, POPUPMUNCH, POPUPVANGOGH,
+        POPUPBATHERS, POPUPMUNCH, POPUPVANGOGH, POPUPMANET, POPUPMATISSE, POPUPMONET,
         DOOR
 };
 
@@ -99,7 +106,10 @@ std::unordered_map<int, int> mapping = {
         {DAVID, POPUPDAVID},
         {MUNCH, POPUPMUNCH},
         {VANGOGH, POPUPVANGOGH},
-        {BATHERS, POPUPBATHERS}
+        {BATHERS, POPUPBATHERS},
+        {MANET, POPUPMANET},
+        {MATISSE, POPUPMATISSE},
+        {MONET, POPUPMONET}
 
 };
 
@@ -709,7 +719,16 @@ protected:
 
                 ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
                     glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));
-
+                if(i == MANET){
+                    ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
+                                glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
+                                glm::rotate(idMatrix, glm::radians(180.0f), yAxis);
+                }
+                if(i == MONET){
+                    ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
+                                glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
+                                glm::rotate(idMatrix, glm::radians(90.0f), yAxis);
+                }
                 //nearestObject != 0 (STRUCTURE) & mapping[.]=0 for each not defined asset
                 if (isPopupShown && nearestObject * mapping[nearestObject] > 0 && i == mapping[nearestObject]) {
                     ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2 * sin(YPR.x), camPos.y, camPos.z - 2 * cos(YPR.x))) *
