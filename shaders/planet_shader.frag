@@ -35,7 +35,9 @@ vec3 compute_Color(vec3 L, vec3 N, vec3 V, vec3 Cd, float sigma) {
 	vec3 vr = normalize(V - (dot(V,N)*N));
 	float G = max(0, dot(vi, vr));
 	vec3 Lo = Cd * clamp(dot(L,N),0,1);
-	
+
+
+
 	vec3 f_diff = Lo*(A + B*G*sin(alpha)*sin(beta));
 	
 	return f_diff;
@@ -44,7 +46,7 @@ vec3 compute_Color(vec3 L, vec3 N, vec3 V, vec3 Cd, float sigma) {
 void main() {
 	vec3 Norm = normalize(fragNorm);
 	vec3 EyeDir = normalize(fragViewDir);
-	vec3 emittingColor = vec3(0.2 * isEmitting.x, 0.0, 0.0)  ;
+	vec3 emittingColor = vec3(0.1, 0.0, 0.0) * isEmitting.x ;
 	float sigma = 1.5f;
 	
 	float AmbFact = 0.025;
@@ -53,7 +55,10 @@ void main() {
 	//vec3 SpecCol = vec3(1.0f, 1.0f, 1.0f);
 
 	vec3 Ambient = AmbFact * DifCol;
-	vec3 Dir =  vec3(cos(radians(150.0f)) * cos(radians(-60.0f)), sin(radians(150.0f)), 	cos(radians(150.0f)) * sin(radians(-60.0f)));
-	vec3 Diffuse = compute_Color(Dir, Norm, EyeDir, DifCol, sigma) * gubo.lightColor ;
+	vec3 Dir =  normalize(gubo.lightPos - fragPos);//vec3(cos(radians(150.0f)) * cos(radians(-60.0f)), sin(radians(150.0f)), 	cos(radians(150.0f)) * sin(radians(-60.0f)));
+
+	vec3 pointLightCol = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.lightPos), gubo.coneInOutDecayExp.w) * gubo.lightColor;
+
+	vec3 Diffuse = compute_Color(Dir, Norm, EyeDir, DifCol, sigma) * pointLightCol ;
 	outColor = vec4(Diffuse + Ambient + emittingColor, 1.0f);
 }

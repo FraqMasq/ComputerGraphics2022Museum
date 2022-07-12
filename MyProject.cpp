@@ -699,6 +699,7 @@ protected:
         
         
         //se mettiamo solo ai quadri (aggiornare anche gli shaders)
+        //@todo spostiamo le luci sui quadri in fondo?
         gubo.spotPosition1 = glm::vec3(11.3f, 5.5f, 2.5f); //van gogh
         gubo.spotPosition2= glm::vec3(11.9f, 5.0f, -1.75f); //munch
         gubo.spotPosition3 = glm::vec3(12.9f, 5.0f, 2.0f); //cezanne
@@ -751,7 +752,7 @@ protected:
             gubo.lightPos = AssetVector2[SUN].pos;
             gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
             gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
-            gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 2.0f);
+            gubo.coneInOutDecayExp = glm::vec4(0.0f, 0.0f, 5.0f, 1.0f);
 
 
             vkMapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage], 0,
