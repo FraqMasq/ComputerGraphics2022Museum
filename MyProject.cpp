@@ -312,9 +312,9 @@ protected:
         // The last array, is a vector of pointer to the layouts of the sets that will
         // be used in this pipeline. The first element will be set 0, and so on..
         
-            P1.reinit(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj }); //maybe reinit is equal to init at the end, check if needs another moethod
+            P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLGlobal, &DSLObj }); 
             
-            P2.reinit(this, "shaders/planet_vert.spv", "shaders/planet_frag.spv", { &DSLGlobal, &DSLObj2 }); //maybe reinit is equal to init at the end, check if needs another moethod
+            P2.init(this, "shaders/planet_vert.spv", "shaders/planet_frag.spv", { &DSLGlobal, &DSLObj2 }); 
         
     }
 
