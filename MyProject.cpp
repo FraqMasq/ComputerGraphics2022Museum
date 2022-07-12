@@ -555,7 +555,13 @@ protected:
             camPos += mu * glm::vec3(glm::rotate(glm::mat4(1.0f), YPR.x,
                 glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
-        
+
+        if (curScene == 1 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
+            isPopupShown = true;
+            nearestObject = POPUPSOLARSYSTEM;
+        }
+
+
         if (curScene == 0 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
             //if(time - debounce > 0.33) {
                 int notFound = 1;
@@ -579,7 +585,7 @@ protected:
             //}
         }
 
-        if (isPopupShown) {
+        if (isPopupShown && curScene == 0) {
             if (time - debounce > 0.99) {
                 float dist = glm::abs(camPos.x - AssetVector[nearestObject].pos.x) + glm::abs(camPos.z - AssetVector[nearestObject].pos.z);
                 if (dist > 6) {
@@ -779,7 +785,7 @@ protected:
         }
         else{
                 for (int i = 0; i < numAssets2; i++) {
-                    if (i==STRUCTURE2 || i == SUN || i == DOOR2)
+                    if (i==STRUCTURE2 || i == SUN || i == DOOR2 || i == POPUPSOLARSYSTEM)
                         ubo.model = glm::translate(idMatrix, AssetVector2[i].pos) *
                             glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale));
                     else
@@ -791,7 +797,7 @@ protected:
                                 yAxis);
 
                     //nearestObject != 0 (STRUCTURE) & mapping[.]=0 for each not defined asset
-                    if (isPopupShown && nearestObject * mapping[nearestObject] > 0 && i == mapping[nearestObject]) {
+                    if (isPopupShown && nearestObject != 0 && i == POPUPSOLARSYSTEM) {
                         ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2 * sin(YPR.x), camPos.y, camPos.z - 2 * cos(YPR.x))) *
                             //glm::translate(idMatrix, AssetVector[i].pos) *
                             glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale)) *
