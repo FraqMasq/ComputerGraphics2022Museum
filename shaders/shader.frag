@@ -60,25 +60,25 @@ vec3 compute_Color(vec3 N, vec3 V, vec3 Cd, vec3 Cs, float gamma) {
 	vec3 fact1;
 	float fact2;
 	fact1 = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.spotPosition1), gubo.coneInOutDecayExp.w) * gubo.lightColor;
-	fact2 = clamp((dot(normalize(gubo.spotPosition1 - fragPos), gubo.spotDirection1) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
+	fact2 = clamp((dot(normalize(gubo.spotPosition1 - fragPos), gubo.spotDirection2) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
 	                    0,
 						1);
 	vec3 scol1 = fact1 * fact2;
 	
 	fact1 = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.spotPosition2), gubo.coneInOutDecayExp.w) * gubo.lightColor;
-	fact2 = clamp((dot(normalize(gubo.spotPosition2 - fragPos), gubo.spotDirection1) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
+	fact2 = clamp((dot(normalize(gubo.spotPosition2 - fragPos), gubo.spotDirection2) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
 	                    0,
 						1);
 	vec3 scol2 = fact1 * fact2;
 	
 	fact1 = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.spotPosition3), gubo.coneInOutDecayExp.w) * gubo.lightColor;
-	fact2 = clamp((dot(normalize(gubo.spotPosition3 - fragPos), gubo.spotDirection2) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
+	fact2 = clamp((dot(normalize(gubo.spotPosition3 - fragPos), gubo.spotDirection3) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
 	                    0,
 						1);
 	vec3 scol3 = fact1 * fact2;
 	
 	fact1 = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.spotPosition4), gubo.coneInOutDecayExp.w) * gubo.lightColor;
-	fact2 = clamp((dot(normalize(gubo.spotPosition4 - fragPos), gubo.spotDirection3) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
+	fact2 = clamp((dot(normalize(gubo.spotPosition4 - fragPos), gubo.spotDirection1) - gubo.coneInOutDecayExp.x) / (gubo.coneInOutDecayExp.y - gubo.coneInOutDecayExp.x),
 	                    0,
 						1);
 	vec3 scol4 = fact1 * fact2;

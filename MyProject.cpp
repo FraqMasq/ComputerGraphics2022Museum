@@ -488,7 +488,7 @@ protected:
         planet_v[NEPTUNE] = 0.04;
 
         static int nearestObject;
-        int numCircles = 0;
+        static int numCircles = 0;
         int cw;
 
         if(!isPopupShown){
@@ -557,7 +557,7 @@ protected:
         }
         
         if (curScene == 0 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown){
-            if(time - debounce > 0.33) {
+            //if(time - debounce > 0.33) {
                 int notFound = 1;
                 for (int i = 1; i < numAssets && notFound; i++) {
                     float dist = glm::abs(camPos.x - AssetVector[i].pos.x) + glm::abs(camPos.z - AssetVector[i].pos.z);
@@ -576,7 +576,7 @@ protected:
                     }
 
                 }
-            }
+            //}
         }
 
         if (isPopupShown) {
@@ -608,6 +608,7 @@ protected:
         
         if (glfwGetKey(window, GLFW_KEY_SPACE)) {
             if (time - debounce > 0.33) {
+                std::cout << "orientation:" << YPR.x;
                 float door_dist;
                 //int door_pos;
                 //check we are close to the door to allow change of scene
@@ -632,6 +633,7 @@ protected:
                             framebufferResized = true;
                             std::cout << curScene << "\n";
                             camPos = scenePosMap[curScene];
+                            numCircles = 0;
                             YPR = glm::vec3(0.0f, 0.0f, 0.0f);
                         }
                     }
@@ -644,6 +646,7 @@ protected:
                                 framebufferResized = true;
                                 std::cout << curScene << "\n";
                                 camPos = scenePosMap[curScene];
+                                numCircles = 0;
                                 YPR = glm::vec3(0.0f, 0.0f, 0.0f);
                             }
                         }
@@ -680,39 +683,41 @@ protected:
         gubo.lightPos2 = glm::vec3(11.57f, 6.515f, 7.192f); //light for the paintings
 
         
-        gubo.spotPosition1 = glm::vec3(1.3f, 6.0f, -4.3f); //Discobolus
-        gubo.spotPosition2= glm::vec3(6.3f, 6.0f, -4.2f); //venus
-        gubo.spotPosition3 = glm::vec3(4.5f, 4.0f, -1.3f); //david
-        gubo.spotPosition4 = glm::vec3(2.0f, 4.0f, -3.0f); //hercules
+        //gubo.spotPosition1 = glm::vec3(1.3f, 6.0f, -4.3f); //Discobolus
+        //gubo.spotPosition2= glm::vec3(6.3f, 6.0f, -4.2f); //venus
         
-        /*
+        //gubo.spotPosition4 = glm::vec3(2.0f, 4.0f, -3.0f); //hercules
+        
+        
         //se mettiamo solo ai quadri (aggiornare anche gli shaders)
         gubo.spotPosition1 = glm::vec3(11.3f, 5.5f, 2.5f); //van gogh
         gubo.spotPosition2= glm::vec3(11.9f, 5.0f, -1.75f); //munch
-        gubo.spotPosition3 = glm::vec3(12.9f, 4.5f, 2.0f); //cezanne
-        */
+        gubo.spotPosition3 = glm::vec3(12.9f, 5.0f, 2.0f); //cezanne
+        gubo.spotPosition4 = glm::vec3(4.5f, 4.0f, -1.3f); //david
+        
 
         
         //set correct direction as angle atan(y,x) where y and x are differences between y and x coordinate of 
         //statues and spotlights
         //float theta = glm::atan(AssetVector[2].pos.z - gubo.spotPositions[0].z, AssetVector[2].pos.x - gubo.spotPositions[0].x);
-        float theta = glm::radians(90.0f);
-        gubo.spotDirection1 = glm::normalize(glm::vec3(cos(theta), sin(theta), 0.7f));
+        //float theta = glm::radians(90.0f);
+        //gubo.spotDirection1 = glm::normalize(glm::vec3(cos(theta), sin(theta), 0.7f));
         //theta = glm::atan(glm::abs(AssetVector[1].pos.z - gubo.spotPositions[1].z) , glm::abs(AssetVector[1].pos.x - gubo.spotPositions[1].x));
         //theta = glm::atan(glm::abs(AssetVector[5].pos.z - gubo.spotPositions[2].z) , glm::abs(AssetVector[5].pos.x - gubo.spotPositions[2].x));
-        theta = glm::radians(160.0f);
-        gubo.spotDirection2 = glm::vec3(cos(theta), sin(theta), 0.0f);
+        
+        //gubo.spotDirection3 = glm::normalize((gubo.spotPosition4 - AssetVector[HERCULES].pos));
+        
+        float theta = glm::radians(160.0f);
+        gubo.spotDirection1 = glm::vec3(cos(theta), sin(theta), 0.0f); //david
         //theta = glm::atan(glm::abs(AssetVector[HERCULES].pos.z - gubo.spotPosition4.z) , glm::abs(AssetVector[HERCULES].pos.x - gubo.spotPosition4.x));
-        theta = glm::radians(20.0f);
-        gubo.spotDirection3 = glm::vec3(cos(theta), sin(theta), 0.0f);
-        gubo.spotDirection3 = glm::normalize((gubo.spotPosition4 - AssetVector[HERCULES].pos));
-        /*
+        //theta = glm::radians(20.0f);
+        //gubo.spotDirection3 = glm::vec3(cos(theta), sin(theta), 0.0f);
         //per i quadri
-        float theta = glm::radians(150.0f);
-        gubo.spotDirection1 = glm::vec3(cos(theta), sin(theta), 0.0f);
+        theta = glm::radians(150.0f);
+        gubo.spotDirection2 = glm::vec3(cos(theta), sin(theta), 0.0f); 
         theta = glm::radians(30.0f);
-        gubo.spotDirection2 = glm::vec3(cos(theta), sin(theta), 0.0f);
-        */
+        gubo.spotDirection3 = glm::vec3(cos(theta), sin(theta), 0.0f);
+        
         gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
         gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 2.0f);
@@ -830,7 +835,9 @@ protected:
     }
 
     bool checkOrientation(float obj_x, float obj_z, float my_x, float my_z, float orientation, int cw) {
-        //function to check if object is visible from my point of view, cw indicates if orientation was posive 
+        //function to check if object is visible from my point of view,
+        // orientation is the orientation made positive 
+        // cw indicates if orientation was posive 
         // (rotation clockwise) or negative (rotaion counter clockwise)
         bool isSeen = 0;
         obj_x = obj_x * cw;
