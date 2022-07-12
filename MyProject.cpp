@@ -143,6 +143,21 @@ struct UniformBufferObject {
 
 };
 
+struct GlobalUniformBufferObject2 {
+    alignas(16) glm::vec3 lightPos;
+    alignas(16) glm::vec3 lightColor;
+    alignas(16) glm::vec3 ambColor;
+    alignas(16) glm::vec4 coneInOutDecayExp;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
+};
+
+struct UniformBufferObject2 {
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::vec2 isEmitting;
+
+};
+
 const glm::mat4 idMatrix = glm::mat4(1.0f);
 const glm::vec3 xAxis = glm::vec3(1.0f, 0.0f, 0.0f);
 const glm::vec3 yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -273,7 +288,7 @@ protected:
                     // second element : UNIFORM or TEXTURE (an enum) depending on the type
                     // third  element : only for UNIFORMs, the size of the corresponding C++ object
                     // fourth element : only for TEXTUREs, the pointer to the corresponding texture object */
-                {0, UNIFORM, sizeof(UniformBufferObject), nullptr},
+                {0, UNIFORM, sizeof(UniformBufferObject2), nullptr},
                 {1, TEXTURE, 0, &componentsVector2[j].T}
                     });
 
@@ -297,7 +312,7 @@ protected:
                 });
 
             DS_GLOBAL2.init(this, &DSLGlobal, {
-                    {0, UNIFORM, sizeof(GlobalUniformBufferObject), nullptr}
+                    {0, UNIFORM, sizeof(GlobalUniformBufferObject2), nullptr}
                 });
 
            
@@ -431,17 +446,6 @@ protected:
     }
 
 
-    float computeDeltaTime() {
-        // Compute time
-        static auto startTime = std::chrono::high_resolution_clock::now();
-        static float lastTime = 0.0f;
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        float time = std::chrono::duration<float, std::chrono::seconds::period>
-            (currentTime - startTime).count();
-        float dt = time - lastTime;
-        lastTime = time;
-        return dt;
-    }
     /* Create a look in direction matrix
     // Pos    -> Position of the camera
     // NB Angs have angles in Rad
@@ -470,9 +474,7 @@ protected:
         float time = std::chrono::duration<float, std::chrono::seconds::period>
             (currentTime - startTime).count();
 
-        //Duplicate for each obj, model may change and view/proj is same for each obj
-        UniformBufferObject ubo{};
-        GlobalUniformBufferObject gubo{};
+
         void* data;
 
         float omega, mu, dt;
@@ -667,6 +669,11 @@ protected:
             camPos = oldPos;
         }
 
+        if(curScene == 0) {
+
+            GlobalUniformBufferObject gubo{};
+
+
 
         gubo.view = LookInDirMat(camPos, YPR);
 
@@ -677,10 +684,6 @@ protected:
             0.1f, 80.0f);
         gubo.proj[1][1] *= -1;
         // Matrix from light's point of view
-        glm::mat4 depthProjectionMatrix = glm::perspective(glm::radians(70.0f), 1.0f, 3.0f, 10.0f);
-        glm::mat4 depthViewMatrix = glm::lookAt(glm::vec3(2.0f, 4.0f, -3.0f), AssetVector[HERCULES].pos, glm::vec3(0, 1, 0));
-        depthProjectionMatrix[1][1] *= -1;
-        glm::mat4 depthModelMatrix = glm::mat4(1.0f);
 
 
 
@@ -728,32 +731,40 @@ protected:
         gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
         gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 2.0f);
 
-        if (curScene == 0) {
+
             vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
                 sizeof(gubo), 0, &data);
 
             memcpy(data, &gubo, sizeof(gubo));
             vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
 
-            vkMapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage], 0,
-                sizeof(gubo), 0, &data);
-            memcpy(data, &gubo, sizeof(gubo));
-            vkUnmapMemory(device, DS_GLOBAL.uniformBuffersMemory[0][currentImage]);
         }
         else{
+            GlobalUniformBufferObject2 gubo{};
+
+            gubo.view = LookInDirMat(camPos, YPR);
+            gubo.proj = glm::perspective(glm::radians(45.0f),
+                                         swapChainExtent.width / (float)swapChainExtent.height,
+                                         0.1f, 80.0f);
+            gubo.proj[1][1] *= -1;
+
+            gubo.lightPos = AssetVector2[SUN].pos;
+            gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
+            gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
+            gubo.coneInOutDecayExp = glm::vec4(0.9f, 0.92f, 2.0f, 2.0f);
+
+
             vkMapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage], 0,
                 sizeof(gubo), 0, &data);
 
             memcpy(data, &gubo, sizeof(gubo));
             vkUnmapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage]);
 
-            vkMapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage], 0,
-                sizeof(gubo), 0, &data);
-            memcpy(data, &gubo, sizeof(gubo));
-            vkUnmapMemory(device, DS_GLOBAL2.uniformBuffersMemory[0][currentImage]);
+
         }
             
         if (curScene == 0) {
+            UniformBufferObject ubo{};
             for (int i = 0; i < numAssets; i++) {
 
 
@@ -784,10 +795,17 @@ protected:
             }
         }
         else{
+            UniformBufferObject2 ubo{};
+
                 for (int i = 0; i < numAssets2; i++) {
-                    if (i==STRUCTURE2 || i == SUN || i == DOOR2 || i == POPUPSOLARSYSTEM)
+                    ubo.isEmitting = glm::vec2(0.0);
+                    if(i == 1){
+                        ubo.isEmitting = glm::vec2(1.0, 0.0);
+                    }
+                    if (i==STRUCTURE2 || i == SUN || i == DOOR2 || i == POPUPSOLARSYSTEM){
                         ubo.model = glm::translate(idMatrix, AssetVector2[i].pos) *
                             glm::scale(idMatrix, glm::vec3(AssetVector2[i].scale));
+                    }
                     else
                         ubo.model = glm::rotate(idMatrix, glm::radians(270.0f) * time * planet_v[i],
                             yAxis) *

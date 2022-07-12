@@ -1,18 +1,10 @@
 #version 450
 
 layout(set=0, binding = 0) uniform GlobalUniformBufferObject {
-    vec3 lightPos1;
-    vec3 lightPos2;
-    vec3 lightColor;
-    vec3 ambColor;
-    vec4 coneInOutDecayExp;
-	vec3 spotPosition1;
-    vec3 spotPosition2;
-    vec3 spotPosition3;
-    vec3 spotPosition4;
-    vec3 spotDirection1;
-    vec3 spotDirection2;
-    vec3 spotDirection3;
+	vec3 lightPos;
+	vec3 lightColor;
+	vec3 ambColor;
+	vec4 coneInOutDecayExp;
 	mat4 view;
 	mat4 proj;
 } gubo;
@@ -24,6 +16,7 @@ layout(location = 0) in vec3 fragViewDir;
 layout(location = 1) in vec3 fragNorm;
 layout(location = 2) in vec2 fragTexCoord;
 layout(location = 3) in vec3 fragPos;
+layout(location = 4) in vec2 isEmitting;
 
 layout(location = 0) out vec4 outColor;
 
@@ -51,6 +44,7 @@ vec3 compute_Color(vec3 L, vec3 N, vec3 V, vec3 Cd, float sigma) {
 void main() {
 	vec3 Norm = normalize(fragNorm);
 	vec3 EyeDir = normalize(fragViewDir);
+	vec3 emittingColor = vec3(0.2 * isEmitting.x, 0.0, 0.0)  ;
 	float sigma = 1.5f;
 	
 	float AmbFact = 0.025;
@@ -61,5 +55,5 @@ void main() {
 	vec3 Ambient = AmbFact * DifCol;
 	vec3 Dir =  vec3(cos(radians(150.0f)) * cos(radians(-60.0f)), sin(radians(150.0f)), 	cos(radians(150.0f)) * sin(radians(-60.0f)));
 	vec3 Diffuse = compute_Color(Dir, Norm, EyeDir, DifCol, sigma) * gubo.lightColor ;
-	outColor = vec4(Diffuse + Ambient, 1.0f);	
+	outColor = vec4(Diffuse + Ambient + emittingColor, 1.0f);
 }
