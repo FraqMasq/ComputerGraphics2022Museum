@@ -9,6 +9,7 @@ struct Asset {
     const std::string TexturePath;
     const glm::vec3 pos;
     const float scale;
+    const glm::vec3 rot;
 };
 
 struct Map {
@@ -27,53 +28,53 @@ struct Component {
 
 
 const std::vector<Asset> AssetVector = {
-        {"models/misc/WallsAndFloor.obj",       "textures/misc/ProvaOmbre.png",                  {0.0,    0.0,   0.0},    1.0},
+        {"models/misc/WallsAndFloor.obj",       "textures/misc/ProvaOmbre.png",                  {0.0,    0.0,   0.0},    1.0, {0.0,    0.0,   0.0}},
 
-        {"models/statues/venus.obj",            "textures/statues/statue_venus.jpg",             {6.222,  0.0,   -7.317}, 1.0},
-        {"models/statues/discobolus.obj",       "textures/statues/discobolusTexture.png",        {1.416,  0.0,   -7.204}, 1.0},
-        {"models/statues/pedestal.obj",         "textures/statues/pedestal.jpg",                 {-1.103, 0.0,   -3.003}, 1.0},
-        {"models/statues/hercules.obj",         "textures/statues/hercules.jpg",                 {-1.135, 1.647, -2.989}, 1.0},
-        {"models/statues/davidStatue.obj",      "textures/statues/davidTexture.jpg",             {8.308,  0.0,   -1.278}, 1.0},
-
-
-        {"models/paints/Frames.obj",            "textures/paints/T_picture_frame_BaseColor.tga", {0.0,    0.0,   0.0},    1.0},
-        {"models/paints/HorizontalPicture.obj", "textures/paints/theBathers_Cezanne.jpg",        {9.393,  2.842, 1.641},  1.0},
-        {"models/paints/VerticalPicture.obj",   "textures/paints/Munch_Scream.jpg",              {13.97,  3.558, -1.757}, 1.0},
-        {"models/paints/VerticalPicture.obj",   "textures/paints/VanGogh_self.jpg",              {13.97,  3.558, 2.558},  1.0},
-        {"models/paints/HorizontalPicture.obj", "textures/paints/Manet_Dejeuner.jpg",            {14.01,  3.182, 7.035},  1.0},
-        {"models/paints/HorizontalPicture.obj", "textures/paints/Matisse_theDance.jpg",          {9.365,  2.85,  6.409},  1.0},
-        {"models/paints/HorizontalPicture.obj", "textures/paints/Monet-Sunrise.jpg",             {11.66,  3.182, 10.01},  1.0},
+        {"models/statues/venus.obj",            "textures/statues/statue_venus.jpg",             {6.222,  0.0,   -7.317}, 1.0, {0.0,    0.0,   0.0}},
+        {"models/statues/discobolus.obj",       "textures/statues/discobolusTexture.png",        {1.416,  0.0,   -7.204}, 1.0, {0.0,    0.0,   0.0}},
+        {"models/statues/pedestal.obj",         "textures/statues/pedestal.jpg",                 {-1.103, 0.0,   -3.003}, 1.0, {0.0,    0.0,   0.0}},
+        {"models/statues/hercules.obj",         "textures/statues/hercules.jpg",                 {-1.135, 1.647, -2.989}, 1.0, {0.0,    0.0,   0.0}},
+        {"models/statues/davidStatue.obj",      "textures/statues/davidTexture.jpg",             {8.308,  0.0,   -1.278}, 1.0, {0.0,    0.0,   0.0}},
 
 
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpVenus.png",            {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpDiscobolus.png",       {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpHercules.png",         {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpDavid.png",            {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpBathers.png",          {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpMunch.png",            {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpVanGogh.png",          {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpManet.png",            {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpMatisse.png",          {-5.0,   -5.0,  -5.0},   0.2},
-        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpMonet.png",            {-5.0,   -5.0,  -5.0},   0.2},
+        {"models/paints/Frames.obj",            "textures/paints/T_picture_frame_BaseColor.tga", {0.0,    0.0,   0.0},    1.0, {0.0,    0.0,   0.0}},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/theBathers_Cezanne.jpg",        {9.393,  2.842, 1.641},  1.0, {0.0,    0.0,   0.0}},
+        {"models/paints/VerticalPicture.obj",   "textures/paints/Munch_Scream.jpg",              {13.97,  3.558, -1.757}, 1.0, {0.0,    0.0,   0.0}},
+        {"models/paints/VerticalPicture.obj",   "textures/paints/VanGogh_self.jpg",              {13.97,  3.558, 2.558},  1.0, {0.0,    0.0,   0.0}},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/Manet_Dejeuner.jpg",            {14.01,  3.182, 7.035},  1.0, {0.0,    180.0,   0.0}},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/Matisse_theDance.jpg",          {9.365,  2.85,  6.409},  1.0, {0.0,    0.0,   0.0}},
+        {"models/paints/HorizontalPicture.obj", "textures/paints/Monet-Sunrise.jpg",             {11.66,  3.182, 10.01},  1.0, {0.0,    90.0,   0.0}},
 
-        {"models/misc/doors.obj",               "textures/misc/door.png",                        {3.142,  0.0,   2.012},  1}
+
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpVenus.png",            {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpDiscobolus.png",       {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpHercules.png",         {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpDavid.png",            {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpBathers.png",          {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpMunch.png",            {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpVanGogh.png",          {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpManet.png",            {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpMatisse.png",          {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",               "textures/misc/popup/PopUpMonet.png",            {-5.0,   -5.0,  -5.0},   0.2, {0.0,    0.0,   0.0}},
+
+        {"models/misc/doors.obj",               "textures/misc/door.png",                        {3.142,  0.0,   2.012},  1, {0.0,    0.0,   0.0}}
 
 };
 
 const std::vector<Asset> AssetVector2 = {
-        {"models/misc/StructureScene2.obj",  "textures/misc/StructureScene2Texture.jpeg", {0.0,  0.0,  0.0},   1.0},
+        {"models/misc/StructureScene2.obj",  "textures/misc/StructureScene2Texture.jpeg", {0.0,  0.0,  0.0},   1.0, {0.0,    0.0,   0.0}},
 
-        {"models/planets/PlanetsSphere.obj", "textures/planets/sun.jpg",                  {0.0,  2.0,  0.0},   1.0},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/mercury.jpg",              {0.0,  2.0,  2.0},   0.1},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg",                {0.0,  2.0,  3.0},   0.25},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/earth.jpg",                {0.0,  2.0,  4.0},   0.25},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/mars.jpg",                 {0.0,  2.0,  5.0},   0.15},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/jupiter.jpg",              {0.0,  2.0,  8.0},   1.1},
-        {"models/planets/Staturn.obj",       "textures/planets/saturnWithRings.jpg",      {0.0,  2.0,  11.0},  1.0},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg",              {0.0,  2.0,  14.0},  0.5},
-        {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg",               {0.0,  2.0,  17.0},  0.5},
-        {"models/misc/PopUp.obj",            "textures/misc/popup/PopUpSolarSystem.png",  {-5.0, -5.0, -5.0},  0.2},
-        {"models/misc/doors.obj",            "textures/misc/door.png",                    {0.0,  0.0,  30.03}, 1}
+        {"models/planets/PlanetsSphere.obj", "textures/planets/sun.jpg",                  {0.0,  2.0,  0.0},   1.0, {0.0,    0.0,   0.0}},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/mercury.jpg",              {0.0,  2.0,  2.0},   0.1, {0.0,    0.0,   0.0}},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/venus.jpg",                {0.0,  2.0,  3.0},   0.25, {0.0,    0.0,   0.0}},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/earth.jpg",                {0.0,  2.0,  4.0},   0.25, {0.0,    0.0,   0.0}},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/mars.jpg",                 {0.0,  2.0,  5.0},   0.15, {0.0,    0.0,   0.0}},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/jupiter.jpg",              {0.0,  2.0,  8.0},   1.1, {0.0,    0.0,   0.0}},
+        {"models/planets/Staturn.obj",       "textures/planets/saturnWithRings.jpg",      {0.0,  2.0,  11.0},  1.0, {0.0,    0.0,   0.0}},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/neptune.jpg",              {0.0,  2.0,  14.0},  0.5, {0.0,    0.0,   0.0}},
+        {"models/planets/PlanetsSphere.obj", "textures/planets/uranus.jpg",               {0.0,  2.0,  17.0},  0.5, {0.0,    0.0,   0.0}},
+        {"models/misc/PopUp.obj",            "textures/misc/popup/PopUpSolarSystem.png",  {-5.0, -5.0, -5.0},  0.2, {0.0,    0.0,   0.0}},
+        {"models/misc/doors.obj",            "textures/misc/door.png",                    {0.0,  0.0,  30.03}, 1, {0.0,    0.0,   0.0}}
 
 
 };
@@ -705,7 +706,7 @@ protected:
 
             gubo.lightPos = AssetVector2[SUN].pos;
             gubo.lightColor = glm::vec3(0.6f, 0.6f, 0.6f);
-            gubo.ambColor = glm::vec3(0.1f, 0.1f, 0.1f);
+            gubo.ambColor = glm::vec3(0.02f, 0.02f, 0.02f);
             gubo.coneInOutDecayExp = glm::vec4(0.0f, 0.0f, 5.0f, 1.0f);
 
 
@@ -724,17 +725,16 @@ protected:
 
 
                 ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
-                            glm::scale(idMatrix, glm::vec3(AssetVector[i].scale));
-                if (i == MANET) {
-                    ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
-                                glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
-                                glm::rotate(idMatrix, glm::radians(180.0f), yAxis);
-                }
-                if (i == MONET) {
-                    ubo.model = glm::translate(idMatrix, AssetVector[i].pos) *
-                                glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
-                                glm::rotate(idMatrix, glm::radians(90.0f), yAxis);
-                }
+                            glm::scale(idMatrix, glm::vec3(AssetVector[i].scale)) *
+                        glm::rotate(idMatrix, glm::radians(AssetVector[i].rot.y), yAxis) *
+                        glm::rotate(idMatrix, glm::radians(AssetVector[i].rot.x), xAxis) *
+                        glm::rotate(idMatrix, glm::radians(AssetVector[i].rot.z), zAxis);
+
+                /*if(i == HERCULES){
+                    ubo.model = ubo.model *
+                            glm::rotate(idMatrix, glm::radians(270.0f)*time * omega/4, yAxis);
+                }*/
+
                 //nearestObject != -1 (STRUCTURE) & mapping[.]=0 for each not defined asset
                 if (isPopupShown && nearestObject * mapping[nearestObject] > 0 && i == mapping[nearestObject]) {
                     ubo.model = glm::translate(idMatrix, glm::vec3(camPos.x - 2 * sin(YPR.x), camPos.y,
