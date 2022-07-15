@@ -494,10 +494,14 @@ protected:
         int present = glfwJoystickPresent(GLFW_JOYSTICK_1);
         int axesCount;
         const float *axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
-        // std::cout << present << "\tAxes available:" << axesCount<< "\n";
+        int buttonCount;
+        const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+         //std::cout << present << "\tButton available:" << buttonCount<< "\n";
         if (present == 1 && axesCount != 6) {
             present = 0;
         }
+
+
         glm::vec3 oldPos = camPos;
         if (glfwGetKey(window, GLFW_KEY_LEFT) || (present == 1 && axes[2] <= -0.5)) {
             YPR.x += dt * omega;
@@ -537,13 +541,13 @@ protected:
                                                  glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0, 0, 1, 1)) * dt;
         }
 
-        if (curScene == 1 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown) {
+        if (curScene == 1 && (glfwGetKey(window, GLFW_KEY_K) || (present && buttons[1] == GLFW_PRESS)) && !isPopupShown) {
             isPopupShown = true;
             nearestObject = POPUPSOLARSYSTEM;
         }
 
 
-        if (curScene == 0 && glfwGetKey(window, GLFW_KEY_K) && !isPopupShown) {
+        if (curScene == 0 && (glfwGetKey(window, GLFW_KEY_K) || (present && buttons[1] == GLFW_PRESS)) && !isPopupShown) {
             int notFound = 1;
             for (int i = 1; i < numAssets && notFound; i++) {
                 float dist = glm::abs(camPos.x - AssetVector[i].pos.x) + glm::abs(camPos.z - AssetVector[i].pos.z);
@@ -587,13 +591,13 @@ protected:
             }
         }
 
-        if (glfwGetKey(window, GLFW_KEY_L) && isPopupShown) {
+        if ((glfwGetKey(window, GLFW_KEY_L)|| (present && buttons[2] == GLFW_PRESS)) && isPopupShown) {
             isPopupShown = false;
             nearestObject = -1;
             std::cout << "Closing Popup\n";
         }
 
-        if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+        if ((glfwGetKey(window, GLFW_KEY_SPACE)|| (present && buttons[3] == GLFW_PRESS))) {
             if (time - debounce > 0.33) {
                 std::cout << "orientation:" << YPR.x;
                 float door_dist;
