@@ -49,12 +49,12 @@ void main() {
 	vec3 emittingColor = vec3(0.1, 0.0, 0.0) * isEmitting.x ;
 	float sigma = 1.5f;
 	
-	float AmbFact = 0.025;
+	//float AmbFact = 0.025;
 	
 	vec3 DifCol = texture(texSampler, fragTexCoord).rgb;
 	//vec3 SpecCol = vec3(1.0f, 1.0f, 1.0f);
 
-	vec3 Ambient = AmbFact * DifCol;
+	vec3 Ambient = gubo.ambColor * DifCol + 0.5*DifCol*isEmitting.x;
 	vec3 Dir =  normalize(gubo.lightPos - fragPos);//vec3(cos(radians(150.0f)) * cos(radians(-60.0f)), sin(radians(150.0f)), 	cos(radians(150.0f)) * sin(radians(-60.0f)));
 
 	vec3 pointLightCol = pow(gubo.coneInOutDecayExp.z/length(fragPos - gubo.lightPos), gubo.coneInOutDecayExp.w) * gubo.lightColor;
