@@ -78,8 +78,8 @@ const std::vector<Asset> AssetVector2 = {
 
 
 };
-const int numAssets = (int) AssetVector.size(); // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
-const int numAssets2 = (int) AssetVector2.size(); //
+const int numAssets = 24;//AssetVector.size(); // (Frames, Structure and Pedestal = 3) + 2*(NStatues + NPaints)
+const int numAssets2 = 12; //AssetVector2.size(); //
 
 //used to index AssetVector and ComponentVector
 enum ASSETS {
@@ -673,8 +673,7 @@ protected:
 
             gubo.spotPosition1 = glm::vec3(11.3f, 5.5f, 2.5f); //van gogh
             gubo.spotPosition2 = glm::vec3(11.9f, 5.0f, -1.75f); //munch
-            //@todo spostiamo le luci sui quadri in fondo?
-            gubo.spotPosition3 = glm::vec3(12.9f, 5.0f, 2.0f); //cezanne
+            gubo.spotPosition3 = glm::vec3(12.9f, 5.0f, 6.5f); //dance
             gubo.spotPosition4 = glm::vec3(4.5f, 4.0f, -1.3f); //david
 
 
