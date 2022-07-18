@@ -484,8 +484,8 @@ protected:
         static glm::vec3 uz = glm::vec3(glm::rotate(idMatrix, YPR.x, yAxis) *
                                         glm::vec4(0, 0, -1, 1));
 
-        omega = 1; //[Rad/s]
-        mu = 10; //[unit/s]
+        omega = 2; //[Rad/s]
+        mu = 5; //[unit/s]
 
         dt = time - lastTime;
         lastTime = time;
